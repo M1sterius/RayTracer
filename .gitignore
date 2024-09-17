@@ -1,0 +1,4 @@
+Bin/
+CMakeBuild/
+CMakeBuild-Debug/
+CMakeBuild-Release/
