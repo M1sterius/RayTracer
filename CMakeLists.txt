@@ -8,15 +8,39 @@ set(CMAKE_CXX_STANDARD 23)
 set(DEPENDENCIES_DIR ${CMAKE_SOURCE_DIR}/Dependencies)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE})
 
+file(GLOB IMGUI_SOURCES
+    "${DEPENDENCIES_DIR}/imgui/*.h"
+    "${DEPENDENCIES_DIR}/imgui/*.cpp"
+)
+
 add_executable(RayTracer
     ${DEPENDENCIES_DIR}/glad/src/glad.c
+    ${IMGUI_SOURCES}
 
     Source/main.cpp
+    Source/Window.cpp
+    Source/RayTracer.cpp
+    Source/GL/ComputeShader.cpp
+        Source/GL/ShaderSourceProcessing.h
 )
 
 target_include_directories(RayTracer PRIVATE
     ${DEPENDENCIES_DIR}/glm
-    ${DEPENDENCIES_DIR}/glfw/include
+    ${DEPENDENCIES_DIR}/glfw/include/GLFW
     ${DEPENDENCIES_DIR}/glad/include/glad
     ${DEPENDENCIES_DIR}/glad/include
+    ${DEPENDENCIES_DIR}/imgui/include
+
+    Source
+    Source/Utilities
+    Source/GL
+)
+
+add_subdirectory(${DEPENDENCIES_DIR}/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)
+
+find_package(OpenGL REQUIRED)
+
+target_link_libraries(RayTracer PRIVATE
+        OpenGL::GL
+        glfw
 )
