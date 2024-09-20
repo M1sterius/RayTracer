@@ -65,7 +65,7 @@
 
     <request name="get_relative_pointer">
       <description summary="get a relative pointer object">
-	Create a relative pointer interface given a wl_pointer object. See the
+	Init a relative pointer interface given a wl_pointer object. See the
 	wp_relative_pointer interface for more details.
       </description>
       <arg name="id" type="new_id" interface="zwp_relative_pointer_v1"/>

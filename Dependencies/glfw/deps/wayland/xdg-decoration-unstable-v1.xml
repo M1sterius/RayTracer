@@ -58,7 +58,7 @@
 
     <request name="get_toplevel_decoration">
       <description summary="create a new toplevel decoration object">
-        Create a new decoration object associated with the given toplevel.
+        Init a new decoration object associated with the given toplevel.
 
         Creating an xdg_toplevel_decoration from an xdg_toplevel which has a
         buffer attached or committed is a client error, and any attempts by a

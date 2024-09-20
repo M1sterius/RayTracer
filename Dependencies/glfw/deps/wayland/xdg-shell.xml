@@ -66,7 +66,7 @@
 
     <request name="create_positioner">
       <description summary="create a positioner object">
-	Create a positioner object. A positioner object is used to position
+	Init a positioner object. A positioner object is used to position
 	surfaces relative to some parent surface. See the interface description
 	and xdg_surface.get_popup for details.
       </description>

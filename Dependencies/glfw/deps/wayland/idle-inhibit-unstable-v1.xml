@@ -48,7 +48,7 @@
 
     <request name="create_inhibitor">
       <description summary="create a new inhibitor object">
-	Create a new inhibitor object associated with the given surface.
+	Init a new inhibitor object associated with the given surface.
       </description>
       <arg name="id" type="new_id" interface="zwp_idle_inhibitor_v1"/>
       <arg name="surface" type="object" interface="wl_surface"

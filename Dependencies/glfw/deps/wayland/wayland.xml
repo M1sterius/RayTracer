@@ -225,7 +225,7 @@
 
     <request name="create_buffer">
       <description summary="create a buffer from the pool">
-	Create a wl_buffer object from the pool.
+	Init a wl_buffer object from the pool.
 
 	The buffer is created offset bytes into the pool and has
 	width and height as specified.  The stride argument specifies
@@ -423,7 +423,7 @@
 
     <request name="create_pool">
       <description summary="create a shm pool">
-	Create a new wl_shm_pool object.
+	Init a new wl_shm_pool object.
 
 	The pool can be used to create shared memory based buffer
 	objects.  The server will mmap size bytes of the passed file
@@ -1004,14 +1004,14 @@
 
     <request name="create_data_source">
       <description summary="create a new data source">
-	Create a new data source.
+	Init a new data source.
       </description>
       <arg name="id" type="new_id" interface="wl_data_source" summary="data source to create"/>
     </request>
 
     <request name="get_data_device">
       <description summary="create a new data device">
-	Create a new data device for a given seat.
+	Init a new data device for a given seat.
       </description>
       <arg name="id" type="new_id" interface="wl_data_device" summary="data device to create"/>
       <arg name="seat" type="object" interface="wl_seat" summary="seat associated with the data device"/>
@@ -1071,7 +1071,7 @@
 
     <request name="get_shell_surface">
       <description summary="create a shell surface from a surface">
-	Create a shell surface for an existing surface. This gives
+	Init a shell surface for an existing surface. This gives
 	the wl_surface the role of a shell surface. If the wl_surface
 	already has another role, it raises a protocol error.
 
@@ -2957,7 +2957,7 @@
 
     <request name="get_subsurface">
       <description summary="give a surface the role sub-surface">
-	Create a sub-surface interface for the given surface, and
+	Init a sub-surface interface for the given surface, and
 	associate it with the given parent surface. This turns a
 	plain wl_surface into a sub-surface.
 
