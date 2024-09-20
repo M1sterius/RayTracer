@@ -8,7 +8,7 @@
 int32_t main(int32_t argc, char* argv[])
 {
     const auto& window = Window::Init(1600, 900, "RayTracer");
-    const auto rayTracer = RayTracer();
+    const auto& rayTracer = RayTracer::Init();
 
     while (!window.ShouldClose())
     {

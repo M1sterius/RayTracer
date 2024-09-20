@@ -3,9 +3,10 @@
 class RayTracer
 {
 public:
-    RayTracer();
-    ~RayTracer();
+    static RayTracer& Init();
 
     void Update() const;
 private:
+    RayTracer();
+    ~RayTracer();
 };

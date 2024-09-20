@@ -14,3 +14,9 @@ void RayTracer::Update() const
 {
 
 }
+
+RayTracer& RayTracer::Init()
+{
+    static auto rayTracer = RayTracer();
+    return rayTracer;
+}
