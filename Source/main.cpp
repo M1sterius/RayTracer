@@ -8,13 +8,12 @@
 int32_t main(int32_t argc, char* argv[])
 {
     const auto& window = Window(1600, 900, "RayTracer");
-    const auto& rayTracer = RayTracer();
-
-    auto shader = ComputeShader::FromFile("Resources/Shaders/TestCompute.glsl");
+    const auto& rayTracer = RayTracer(window);
 
     while (!window.ShouldClose())
     {
+        window.Clear();
         rayTracer.Update();
-        window.Update();
+        window.SwapBuffers();
     }
 }

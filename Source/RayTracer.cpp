@@ -5,7 +5,7 @@
 
 RayTracer::RayTracer(const Window& window)
     : m_Window(window), m_ScreenTextureHandle(0), m_VertexArrayHandle(0), m_IndexBufferHandle(0),
-      m_ScreenShaderHandle(0)
+      m_ScreenShaderHandle(0), m_RayTracerShader(ComputeShader::FromFile("Resources/Shaders/TestCompute.glsl"))
 {
     InitScreenQuad();
     InitScreenQuadShader();
@@ -18,7 +18,7 @@ RayTracer::~RayTracer()
 
 void RayTracer::Update() const
 {
-
+    DrawScreenQuad();
 }
 
 void RayTracer::InitScreenQuad()
@@ -43,10 +43,9 @@ void RayTracer::InitScreenQuad()
         -1.0f, -1.0f,   0.0f, 0.0f    // bottom-left
     };
 
-    // Index data for two triangles forming the quad
     unsigned int indices[] = {
-        0, 1, 2,    // First triangle
-        2, 3, 0     // Second triangle
+        0, 1, 2,
+        2, 3, 0
     };
 
     // Create buffers and VAO
@@ -136,9 +135,20 @@ void RayTracer::InitScreenQuadShader()
 
     // Bind the shader and set the uniforms once since there are no changes between frames
     glUseProgram(m_ScreenShaderHandle);
+    const int location = glGetUniformLocation(m_ScreenShaderHandle, "u_ScreenTexture");
+    glUniform1i(location, 0);
+
+    // Bind the texture to slot 0
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_ScreenTextureHandle);
 }
 
 void RayTracer::DrawScreenQuad() const
 {
+    /*
+     * All buffers and shaders have been bound during initialisation because there are
+     * no changes between frames.
+     */
+
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }

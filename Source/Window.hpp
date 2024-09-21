@@ -11,7 +11,8 @@ public:
     Window(const size_t width, const size_t height, const std::string& title);
     ~Window();
 
-    void Update() const;
+    void Clear() const;
+    void SwapBuffers() const;
     bool ShouldClose() const;
 
     inline size_t GetWidth() const { return m_Width; }

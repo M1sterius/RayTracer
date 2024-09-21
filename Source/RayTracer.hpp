@@ -1,5 +1,9 @@
 #pragma once
 
+#include "ComputeShader.hpp"
+
+#include <memory>
+
 class Window;
 
 class RayTracer
@@ -18,6 +22,8 @@ private:
     unsigned int m_VertexArrayHandle;
     unsigned int m_IndexBufferHandle;
     unsigned int m_ScreenShaderHandle;
+
+    ComputeShader m_RayTracerShader;
 
     const Window& m_Window;
 };
