@@ -21,7 +21,6 @@ add_executable(RayTracer
     Source/Window.cpp
     Source/RayTracer.cpp
     Source/GL/ComputeShader.cpp
-        Source/GL/ShaderSourceProcessing.h
 )
 
 target_include_directories(RayTracer PRIVATE
@@ -43,4 +42,11 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(RayTracer PRIVATE
         OpenGL::GL
         glfw
+)
+
+set(COPY_OUT_DIR ${CMAKE_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/Resources)
+add_custom_command(TARGET RayTracer POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/Resources/
+        ${COPY_OUT_DIR}
 )

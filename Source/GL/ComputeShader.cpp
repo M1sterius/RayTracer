@@ -2,8 +2,6 @@
 #include "ShaderSourceProcessing.h"
 #include "glad.h"
 
-#include <fstream>
-
 ComputeShader::ComputeShader(const std::string& source)
     : m_Handle(0)
 {

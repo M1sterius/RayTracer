@@ -3,6 +3,8 @@
 #include "glad.h"
 #include "glfw3.h"
 
+#include <iostream>
+
 Window::Window(const size_t width, const size_t height, const std::string& title)
     : m_GLFWWindow(nullptr), m_Width(width), m_Height(height)
 {
@@ -47,8 +49,3 @@ bool Window::ShouldClose() const
     return glfwWindowShouldClose(m_GLFWWindow);
 }
 
-Window& Window::Init(const size_t width, const size_t height, const std::string& title)
-{
-    static auto window = Window(width, height, title);
-    return window;
-}
