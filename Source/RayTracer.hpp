@@ -12,10 +12,11 @@ public:
     explicit RayTracer(const Window& window);
     ~RayTracer();
 
-    void Update() const;
+    void Update();
 private:
     void InitScreenQuad();
     void InitScreenQuadShader();
+    void BindForQuadDraw() const;
     void DrawScreenQuad() const;
 
     unsigned int m_ScreenTextureHandle;

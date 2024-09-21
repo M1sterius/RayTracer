@@ -9,6 +9,7 @@ RayTracer::RayTracer(const Window& window)
 {
     InitScreenQuad();
     InitScreenQuadShader();
+    BindForQuadDraw();
 }
 
 RayTracer::~RayTracer()
@@ -16,8 +17,11 @@ RayTracer::~RayTracer()
     glDeleteTextures(1, &m_ScreenTextureHandle);
 }
 
-void RayTracer::Update() const
+void RayTracer::Update()
 {
+    m_RayTracerShader.Bind();
+    m_RayTracerShader.Dispatch(m_Window.GetWidth(), m_Window.GetHeight(), 1);
+
     DrawScreenQuad();
 }
 
@@ -30,8 +34,8 @@ void RayTracer::InitScreenQuad()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Window.GetWidth(), m_Window.GetHeight(),
-                 0, GL_RGBA, GL_UNSIGNED_BYTE,nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, static_cast<int>(m_Window.GetWidth()), static_cast<int>(m_Window.GetHeight()),
+                 0, GL_RGBA, GL_FLOAT,nullptr);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // Init screen NDC quad
@@ -72,6 +76,10 @@ void RayTracer::InitScreenQuad()
     // Specify vertex attribute for texture coordinates (layout = 1 in shader)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    // Unbind VAO and EBO
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void RayTracer::InitScreenQuadShader()
@@ -132,15 +140,25 @@ void RayTracer::InitScreenQuadShader()
 
     glDeleteShader(vertexHandle);
     glDeleteShader(fragmentHandle);
+}
 
-    // Bind the shader and set the uniforms once since there are no changes between frames
+void RayTracer::BindForQuadDraw() const
+{
+    // Bind the texture to be used as the output of the compute shader
+    glBindImageTexture(0, m_ScreenTextureHandle, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+    // Bind the texture to slot 0 for rendering the full screen quad
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_ScreenTextureHandle);
+
+    // Bind the shader and set the uniform
     glUseProgram(m_ScreenShaderHandle);
     const int location = glGetUniformLocation(m_ScreenShaderHandle, "u_ScreenTexture");
     glUniform1i(location, 0);
 
-    // Bind the texture to slot 0
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_ScreenTextureHandle);
+    // Bind VAO and EBO
+    glBindVertexArray(m_VertexArrayHandle);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferHandle);
 }
 
 void RayTracer::DrawScreenQuad() const
