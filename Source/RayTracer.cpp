@@ -21,13 +21,16 @@ void RayTracer::Update()
 {
     m_RayTracerShader.Bind();
     m_RayTracerShader.Dispatch(m_Window.GetWidth(), m_Window.GetHeight(), 1);
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
     DrawScreenQuad();
 }
 
 void RayTracer::InitScreenQuad()
 {
-    // Init screen sized texture
+    /*
+     * Create a screen-sized texture that will serve as the output of the compute shader
+     */
     glGenTextures(1, &m_ScreenTextureHandle);
     glBindTexture(GL_TEXTURE_2D, m_ScreenTextureHandle);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -38,7 +41,10 @@ void RayTracer::InitScreenQuad()
                  0, GL_RGBA, GL_FLOAT,nullptr);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    // Init screen NDC quad
+    /*
+     * Create a full screen NDC quad to map the output texture onto
+     */
+
     float vertices[] = {
         // positions   // texCoords
         -1.0f,  1.0f,   0.0f, 1.0f,   // top-left
@@ -52,38 +58,37 @@ void RayTracer::InitScreenQuad()
         2, 3, 0
     };
 
-    // Create buffers and VAO
     unsigned int VBO;
     glGenVertexArrays(1, &m_VertexArrayHandle);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &m_IndexBufferHandle);
 
-    // Bind VAO
     glBindVertexArray(m_VertexArrayHandle);
 
-    // Bind and set vertex buffer (VBO)
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // Bind and set index buffer (EBO)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferHandle);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Specify vertex attribute for position (layout = 0 in shader)
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
 
     // Specify vertex attribute for texture coordinates (layout = 1 in shader)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // Unbind VAO and EBO
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void RayTracer::InitScreenQuadShader()
 {
+    /*
+     * Create a shader that will draw the output texture
+     */
+
     static const char* vertexSource = R"(
         #version 460 core
 
@@ -144,17 +149,24 @@ void RayTracer::InitScreenQuadShader()
 
 void RayTracer::BindForQuadDraw() const
 {
-    // Bind the texture to be used as the output of the compute shader
-    glBindImageTexture(0, m_ScreenTextureHandle, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    /*
+     * Bind the output texture, quad VAO and EBO and set the shader uniform once
+     * because these object bindings do not change between frames
+     */
 
     // Bind the texture to slot 0 for rendering the full screen quad
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_ScreenTextureHandle);
 
+    // Bind the texture to be used as the output of the compute shader
+    glBindImageTexture(0, m_ScreenTextureHandle, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+
     // Bind the shader and set the uniform
     glUseProgram(m_ScreenShaderHandle);
     const int location = glGetUniformLocation(m_ScreenShaderHandle, "u_ScreenTexture");
     glUniform1i(location, 0);
+
+    glUseProgram(0);
 
     // Bind VAO and EBO
     glBindVertexArray(m_VertexArrayHandle);
@@ -164,9 +176,9 @@ void RayTracer::BindForQuadDraw() const
 void RayTracer::DrawScreenQuad() const
 {
     /*
-     * All buffers and shaders have been bound during initialisation because there are
-     * no changes between frames.
+     * The buffers have already been bound, so we only bind the shader to draw the output texture
      */
 
+    glUseProgram(m_ScreenShaderHandle);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }

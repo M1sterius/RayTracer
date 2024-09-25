@@ -50,5 +50,4 @@ void ComputeShader::Unbind() const
 void ComputeShader::Dispatch(const size_t x, const size_t y, const size_t z)
 {
     glDispatchCompute(x, y, z);
-    glMemoryBarrier(GL_ALL_BARRIER_BITS);
 }

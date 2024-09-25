@@ -8,8 +8,10 @@ void main()
     vec4 value = vec4(0.0, 0.0, 0.0, 1.0);
     ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
 
-    value.x = float(texelCoord.x)/(gl_NumWorkGroups.x);
-    value.y = float(texelCoord.y)/(gl_NumWorkGroups.y);
+    vec2 uv = vec2(float(texelCoord.x), float(texelCoord.y));
+
+    value.x = uv.x / (gl_NumWorkGroups.x);
+    value.y = uv.y / (gl_NumWorkGroups.y);
 
     imageStore(u_OutputTexture, texelCoord, value);
 }
