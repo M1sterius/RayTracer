@@ -21,6 +21,7 @@ add_executable(RayTracer
     Source/Window.cpp
     Source/RayTracer.cpp
     Source/GL/ComputeShader.cpp
+    Source/Utilities/Stopwatch.h
 )
 
 target_include_directories(RayTracer PRIVATE

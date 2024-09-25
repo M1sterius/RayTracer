@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ComputeShader.hpp"
+#include "Stopwatch.h"
 
 #include <memory>
 
@@ -18,13 +19,17 @@ private:
     void InitScreenQuadShader();
     void BindForQuadDraw() const;
     void DrawScreenQuad() const;
+    void DrawCompute();
 
     unsigned int m_ScreenTextureHandle;
     unsigned int m_VertexArrayHandle;
     unsigned int m_IndexBufferHandle;
     unsigned int m_ScreenShaderHandle;
 
-    ComputeShader m_RayTracerShader;
+    Stopwatch m_Stopwatch;
+    double m_OldTime;
+    double m_DeltaTime;
 
+    ComputeShader m_RayTracerShader;
     const Window& m_Window;
 };

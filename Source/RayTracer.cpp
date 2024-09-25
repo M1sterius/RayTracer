@@ -10,6 +10,10 @@ RayTracer::RayTracer(const Window& window)
     InitScreenQuad();
     InitScreenQuadShader();
     BindForQuadDraw();
+
+    m_Stopwatch = Stopwatch::StartNew();
+    m_OldTime = 0;
+    m_DeltaTime = 0;
 }
 
 RayTracer::~RayTracer()
@@ -19,10 +23,11 @@ RayTracer::~RayTracer()
 
 void RayTracer::Update()
 {
-    m_RayTracerShader.Bind();
-    m_RayTracerShader.Dispatch(m_Window.GetWidth(), m_Window.GetHeight(), 1);
-    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+    const double time = m_Stopwatch.GetElapsed().AsSeconds();
+    m_DeltaTime = time - m_OldTime;
+    m_OldTime = time;
 
+    DrawCompute();
     DrawScreenQuad();
 }
 
@@ -181,4 +186,15 @@ void RayTracer::DrawScreenQuad() const
 
     glUseProgram(m_ScreenShaderHandle);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+}
+
+void RayTracer::DrawCompute()
+{
+    m_RayTracerShader.Bind();
+
+    m_RayTracerShader.SetUniformVec2("u_ScreenSize", glm::vec2(m_Window.GetWidth(), m_Window.GetHeight()));
+//    m_RayTracerShader.SetUniform1f("u_Time", m_Stopwatch.GetElapsed().AsSecondsF());
+
+    m_RayTracerShader.Dispatch(m_Window.GetWidth(), m_Window.GetHeight(), 1);
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
 }

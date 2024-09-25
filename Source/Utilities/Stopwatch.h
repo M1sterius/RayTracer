@@ -7,7 +7,7 @@ struct ElapsedTime
 {
 public:
     ElapsedTime(const std::chrono::high_resolution_clock::duration& duration)
-        : m_Duration(duration)
+            : m_Duration(duration)
     {
 
     }
@@ -61,13 +61,15 @@ private:
 class Stopwatch
 {
 public:
-    Stopwatch()
-    {
-        m_Start = std::chrono::high_resolution_clock::now();
-        m_Running = true;
-    }
-
+    Stopwatch() = default;
     ~Stopwatch() = default;
+
+    inline static Stopwatch StartNew()
+    {
+        auto sw = Stopwatch();
+        sw.Start();
+        return sw;
+    }
 
     inline void Start()
     {
@@ -94,12 +96,12 @@ public:
     inline ElapsedTime GetElapsed() const
     {
         if (m_Running)
-            return {m_Start - std::chrono::high_resolution_clock::now()};
+            return {std::chrono::high_resolution_clock::now() - m_Start};
         else
             return {m_End - m_Start};
     }
 private:
-    bool m_Running;
+    bool m_Running = false;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_Start;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_End;
 };
