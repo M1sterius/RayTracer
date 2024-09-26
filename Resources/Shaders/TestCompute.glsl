@@ -3,6 +3,11 @@
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D u_OutputTexture;
 
+void WritePixelColor(ivec2 coord, vec3 color)
+{
+    imageStore(u_OutputTexture, coord, vec4(color, 1.0));
+}
+
 struct Ray
 {
     vec3 origin;
@@ -61,8 +66,8 @@ void main()
 
     Ray ray = CalcRay(uv);
 
-    if (CheckSphereCollision(vec3(0, 1000, -5), 10, ray))
+    if (CheckSphereCollision(vec3(0, 0.15, -1), 0.1, ray))
         color += vec3(1, 0, 0);
 
-    imageStore(u_OutputTexture, texelCoord, vec4(color, 1.0));
+    WritePixelColor(texelCoord, color);
 }
