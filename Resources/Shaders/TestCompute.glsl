@@ -14,6 +14,11 @@ struct Ray
     vec3 direction;
 };
 
+vec3 GetPointOnRay(Ray ray, float t)
+{
+    return ray.origin + ray.direction * t;
+}
+
 uniform vec2 u_ScreenSize;
 uniform float u_Time;
 
@@ -21,7 +26,7 @@ uniform float u_Time;
 const float PI = 3.14159265359;
 
 // Screen
-const float aspect = u_ScreenSize.x / u_ScreenSize.y;
+float aspect = u_ScreenSize.x / u_ScreenSize.y;
 
 // Camera
 const vec3 cameraPos = vec3(0, 0, 0);
@@ -33,7 +38,7 @@ const vec3 cameraRight = vec3(1.0, 0, 0.0);
 
 // Viewport
 const float tanFOVY = tan(FOVY / 2);
-const vec2 halfViewportSize = vec2(tanFOVY * aspect, tanFOVY) * focalLength;
+vec2 halfViewportSize = vec2(tanFOVY * aspect, tanFOVY) * focalLength;
 
 Ray CalcRay(vec2 uv)
 {
@@ -46,14 +51,16 @@ Ray CalcRay(vec2 uv)
     return ray;
 }
 
-bool CheckSphereCollision(vec3 center, float radius, Ray ray)
+float CheckSphereCollision(vec3 center, float radius, Ray ray)
 {
     vec3 oc = center - ray.origin;
     float a = dot(ray.direction, ray.direction);
     float b = -2.0 * dot(ray.direction, oc);
     float c = dot(oc, oc) - radius * radius;
     float disc = b * b - 4 * a * c;
-    return (disc >= 0);
+
+    if (disc < 0) return -1.0;
+    else return (-b - sqrt(disc)) / (2 * a);
 }
 
 void main()
@@ -66,8 +73,14 @@ void main()
 
     Ray ray = CalcRay(uv);
 
-    if (CheckSphereCollision(vec3(0, 0.15, -1), 0.1, ray))
-        color += vec3(1, 0, 0);
+    vec3 spherePos = vec3(0, 0.15, -1);
+    float t = CheckSphereCollision(spherePos, 0.1, ray);
+    if (t > -1.0)
+    {
+        vec3 pnt = GetPointOnRay(ray, t);
+        vec3 n = normalize(pnt - spherePos);
+        color += n * 0.5 + 0.5;
+    }
 
     WritePixelColor(texelCoord, color);
 }
