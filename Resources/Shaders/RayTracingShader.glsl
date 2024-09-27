@@ -106,7 +106,7 @@ vec3 TraceSpheresArray(Ray ray)
         if (hit.t > -1.0 && hit.t < closestHit.t)
         {
             closestHit = hit;
-            closestSphereColor = sphere.material.color;
+            closestSphereColor = sphere.material.color * hit.normal;
         }
     }
 
