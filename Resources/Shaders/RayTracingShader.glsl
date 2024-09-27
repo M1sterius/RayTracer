@@ -13,6 +13,8 @@ uniform float u_Time;
 
 // Constants
 const float PI = 3.14159265359;
+const float POSITIVE_INF = 1.0 / 0.0;
+const float NEGATIVE_INF = -1.0 / 0.0;
 
 // Screen
 float aspect = u_ScreenSize.x / u_ScreenSize.y;
@@ -75,7 +77,7 @@ HitInfo CheckSphereCollision(Sphere sphere, Ray ray)
     HitInfo info;
 
     vec3 oc = sphere.center - ray.origin;
-    float a = dot(ray.direction, ray.direction); // a way to calc squared length
+    float a = dot(ray.direction, ray.direction); // a way to calculate squared length
     float h = dot(ray.direction, oc);
     float c = dot(oc, oc) - sphere.radius * sphere.radius;
     float disc = h * h - a * c;
@@ -87,24 +89,46 @@ HitInfo CheckSphereCollision(Sphere sphere, Ray ray)
     return info;
 }
 
+const uint spheresMaxCount = 100;
+Sphere spheres[spheresMaxCount];
+uint spheresCount = 0;
+
+vec3 TraceSpheresArray(Ray ray)
+{
+    vec3 closestSphereColor = vec3(0.0);
+    HitInfo closestHit = HitInfo(POSITIVE_INF, vec3(0.0), vec3(0.0));
+
+    for (uint i = 0; i < spheresCount; i++)
+    {
+        Sphere sphere = spheres[i];
+        HitInfo hit = CheckSphereCollision(sphere, ray);
+
+        if (hit.t > -1.0 && hit.t < closestHit.t)
+        {
+            closestHit = hit;
+            closestSphereColor = sphere.material.color;
+        }
+    }
+
+    return closestSphereColor;
+}
+
 void main()
 {
     ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
     vec2 fragCoord = vec2(texelCoord).xy / u_ScreenSize.xy;
     vec2 uv = fragCoord * 2.0 - 1;
 
-    vec3 color = vec3(0, 0, 0.0);
+    vec3 color = vec3(0.0, 0.0, 0.0);
 
     Ray ray = CalcRay(uv);
 
-    Sphere sphere = Sphere(vec3(0, 0.15, -1), 0.1, Material(vec3(1.0)));
+    spheres[0] = Sphere(vec3(0, 0.15, -4.0), 0.5, Material(vec3(1.0)));
+    spheresCount++;
+    spheres[1] = Sphere(vec3(0, 0.15, -1), 0.05, Material(vec3(1.0, 0.0, 0.0)));
+    spheresCount++;
 
-    HitInfo sphereHitResult = CheckSphereCollision(sphere, ray);
-
-    if (sphereHitResult.t > -1.0)
-    {
-        color += sphereHitResult.normal * 0.5 + 0.5;
-    }
+    color += TraceSpheresArray(ray);
 
     WritePixelColor(texelCoord, color);
 }
