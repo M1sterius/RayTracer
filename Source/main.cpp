@@ -7,7 +7,7 @@
 
 int32_t main(int32_t argc, char* argv[])
 {
-    auto window = Window(1600, 900, "RayTracer");
+    auto window = Window(2560, 1440, "RayTracer");
     auto rayTracer = RayTracer(window);
 
     while (!window.ShouldClose())
@@ -17,6 +17,4 @@ int32_t main(int32_t argc, char* argv[])
         window.SwapBuffers();
     }
 }
-
-
 

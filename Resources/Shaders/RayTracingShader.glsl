@@ -8,17 +8,6 @@ void WritePixelColor(ivec2 coord, vec3 color)
     imageStore(u_OutputTexture, coord, vec4(color, 1.0));
 }
 
-struct Ray
-{
-    vec3 origin;
-    vec3 direction;
-};
-
-vec3 GetPointOnRay(Ray ray, float t)
-{
-    return ray.origin + ray.direction * t;
-}
-
 uniform vec2 u_ScreenSize;
 uniform float u_Time;
 
@@ -40,6 +29,24 @@ const vec3 cameraRight = vec3(1.0, 0, 0.0);
 const float tanFOVY = tan(FOVY / 2);
 vec2 halfViewportSize = vec2(tanFOVY * aspect, tanFOVY) * focalLength;
 
+struct Ray
+{
+    vec3 origin;
+    vec3 direction;
+};
+
+vec3 GetPointOnRay(Ray ray, float t)
+{
+    return ray.origin + ray.direction * t;
+}
+
+struct HitInfo
+{
+    float t;
+    vec3 hitPoint;
+    vec3 normal;
+};
+
 Ray CalcRay(vec2 uv)
 {
     Ray ray;
@@ -51,16 +58,33 @@ Ray CalcRay(vec2 uv)
     return ray;
 }
 
-float CheckSphereCollision(vec3 center, float radius, Ray ray)
+struct Material
 {
-    vec3 oc = center - ray.origin;
-    float a = dot(ray.direction, ray.direction);
-    float b = -2.0 * dot(ray.direction, oc);
-    float c = dot(oc, oc) - radius * radius;
-    float disc = b * b - 4 * a * c;
+    vec3 color;
+};
 
-    if (disc < 0) return -1.0;
-    else return (-b - sqrt(disc)) / (2 * a);
+struct Sphere
+{
+    vec3 center;
+    float radius;
+    Material material;
+};
+
+HitInfo CheckSphereCollision(Sphere sphere, Ray ray)
+{
+    HitInfo info;
+
+    vec3 oc = sphere.center - ray.origin;
+    float a = dot(ray.direction, ray.direction); // a way to calc squared length
+    float h = dot(ray.direction, oc);
+    float c = dot(oc, oc) - sphere.radius * sphere.radius;
+    float disc = h * h - a * c;
+
+    info.t = disc < 0 ? -1.0 : ((h - sqrt(disc)) / a);
+    info.hitPoint = GetPointOnRay(ray, info.t);
+    info.normal = normalize(info.hitPoint - sphere.center);
+
+    return info;
 }
 
 void main()
@@ -73,13 +97,13 @@ void main()
 
     Ray ray = CalcRay(uv);
 
-    vec3 spherePos = vec3(0, 0.15, -1);
-    float t = CheckSphereCollision(spherePos, 0.1, ray);
-    if (t > -1.0)
+    Sphere sphere = Sphere(vec3(0, 0.15, -1), 0.1, Material(vec3(1.0)));
+
+    HitInfo sphereHitResult = CheckSphereCollision(sphere, ray);
+
+    if (sphereHitResult.t > -1.0)
     {
-        vec3 pnt = GetPointOnRay(ray, t);
-        vec3 n = normalize(pnt - spherePos);
-        color += n * 0.5 + 0.5;
+        color += sphereHitResult.normal * 0.5 + 0.5;
     }
 
     WritePixelColor(texelCoord, color);

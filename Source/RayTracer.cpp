@@ -5,7 +5,7 @@
 
 RayTracer::RayTracer(const Window& window)
     : m_Window(window), m_ScreenTextureHandle(0), m_VertexArrayHandle(0), m_IndexBufferHandle(0),
-      m_ScreenShaderHandle(0), m_RayTracerShader(ComputeShader::FromFile("Resources/Shaders/TestCompute.glsl"))
+      m_ScreenShaderHandle(0), m_RayTracerShader(ComputeShader::FromFile("Resources/Shaders/RayTracingShader.glsl"))
 {
     InitScreenQuad();
     InitScreenQuadShader();
