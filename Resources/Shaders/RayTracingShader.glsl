@@ -31,6 +31,14 @@ const vec3 cameraRight = vec3(1.0, 0, 0.0);
 const float tanFOVY = tan(FOVY / 2);
 vec2 halfViewportSize = vec2(tanFOVY * aspect, tanFOVY) * focalLength;
 
+float RandomFloat(inout uint state)
+{
+    state = state * 747796405 + 2891336453;
+    uint result = ((state >> ((state >> 28) + 4)) ^ state) * 277803737;
+    result = (result >> 22) ^ result;
+    return result / 4294967295.0;
+}
+
 struct Ray
 {
     vec3 origin;
@@ -54,6 +62,7 @@ Ray CalcRay(vec2 uv)
     Ray ray;
     ray.origin = cameraPos;
     const vec2 screenSpaceViewport = halfViewportSize * uv;
+
     ray.direction = normalize(cameraRight * screenSpaceViewport.x + cameraUp *
         screenSpaceViewport.y + cameraForward);
 
@@ -125,10 +134,13 @@ void main()
 
     spheres[0] = Sphere(vec3(0, 0.15, -4.0), 0.5, Material(vec3(1.0)));
     spheresCount++;
-    spheres[1] = Sphere(vec3(0, 0.15, -1), 0.05, Material(vec3(1.0, 0.0, 0.0)));
+    spheres[1] = Sphere(vec3(0, 0.15, -1), 0.05, Material(vec3(1.0)));
     spheresCount++;
 
     color += TraceSpheresArray(ray);
+
+//    uint pixelIndex = texelCoord.x * texelCoord.y;
+//    color += vec3(RandomFloat(pixelIndex), RandomFloat(pixelIndex), RandomFloat(pixelIndex));
 
     WritePixelColor(texelCoord, color);
 }
