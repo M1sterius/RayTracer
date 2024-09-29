@@ -49,6 +49,9 @@ namespace preputils
         return temp;
     }
 
+    /*
+     * Replaces all occurrences of 'toReplace' to 'replacement' in 'string'
+     */
     inline void ReplaceInString(std::string& string, const std::string& toReplace, const std::string& replacement)
     {
         size_t pos = 0;
