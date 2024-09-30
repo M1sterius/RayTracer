@@ -1,3 +1,5 @@
+#include "Resources/Shaders/Test1.glsl"
+
 struct TestStruct
 {
     float a;

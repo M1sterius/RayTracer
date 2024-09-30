@@ -40,14 +40,15 @@ namespace preputils
 
         std::ifstream file(path);
         if (!file.is_open())
-            throw std::runtime_error("Cannot open source file: " + path);
+            throw std::runtime_error("Unable to open the source file at: " + path);
 
         while (std::getline(file, line))
             temp += (line + '\n');
 
         file.close();
 
-        return temp;
+        // Cut off the last newline character in the file
+        return temp.substr(0, temp.find_last_of('\n'));
     }
 
     /*
@@ -73,7 +74,7 @@ namespace preputils
         return directive.substr(quotesPos, directive.length() - (quotesPos + 1));
     }
 
-    inline void ResolveIncludes(std::string& main, const std::vector<std::string>& paths)
+    inline void ResolveIncludes(std::string& main)
     {
         size_t pos = 0;
         while ((pos = main.find(INCLUDE_DIRECTIVE)) != std::string::npos)
@@ -85,11 +86,26 @@ namespace preputils
     }
 }
 
-/*
- *
+/**
+ * @brief Resolves all #include directives in the shader at the give path\n
+ * NOTE: All include file paths in shaders must be specified relative to the executable
+ * that uses this preprocessor
+ * @param shaderPath The path to the shader that will be processed
+ * @return The shader main file with all #include directives replaced with
+ * the contents of the corresponding incliuded files
  */
-template<typename... Args>
-inline std::string ProcessComputeShaders(const std::string& main, const Args&... rest)
+inline std::string ProcessShader(const std::string& shaderPath)
 {
-    const std::vector<std::string> paths = preputils::UnpackVariadicArgs(rest...);
+    auto source = preputils::LoadFile(shaderPath);
+    preputils::ResolveIncludes(source);
+    return source;
 }
+
+// /*
+//  *
+//  */
+// template<typename... Args>
+// inline std::string ProcessComputeShaders(const std::string& main, const Args&... rest)
+// {
+//     const std::vector<std::string> paths = preputils::UnpackVariadicArgs(rest...);
+// }
