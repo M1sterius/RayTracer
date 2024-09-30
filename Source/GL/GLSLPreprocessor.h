@@ -2,7 +2,7 @@
 
 /*
  * A header only GLSL preprocessor that implements
- * #inlude directive in GLSL shaders
+ * #include directive in GLSL shaders
  */
 
 /*
@@ -14,10 +14,11 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <iostream>
 
 namespace preputils
 {
-    const std::string& INCLUDE_DIRECTIVE = "#include";
+    inline const std::string& INCLUDE_DIRECTIVE = "#include";
 
     /*
      * A utility function that helps unpack variadic arguments into a std::vector
@@ -61,6 +62,27 @@ namespace preputils
             pos += replacement.length();
         }
     }
+
+    /*
+     * Takes in a string containing an include directive and
+     * returns an extracted file path
+     */
+    inline std::string ParseIncludeDirective(const std::string& directive)
+    {
+        const size_t quotesPos = directive.find('"', 0) + 1;
+        return directive.substr(quotesPos, directive.length() - (quotesPos + 1));
+    }
+
+    inline void ResolveIncludes(std::string& main, const std::vector<std::string>& paths)
+    {
+        size_t pos = 0;
+        while ((pos = main.find(INCLUDE_DIRECTIVE)) != std::string::npos)
+        {
+            const auto directive = main.substr(pos, main.find('\n', pos) - pos);
+            const auto path = ParseIncludeDirective(directive);
+            ReplaceInString(main, directive, LoadFile(path));
+        }
+    }
 }
 
 /*
@@ -70,8 +92,4 @@ template<typename... Args>
 inline std::string ProcessComputeShaders(const std::string& main, const Args&... rest)
 {
     const std::vector<std::string> paths = preputils::UnpackVariadicArgs(rest...);
-    std::string all = main;
-    for (const auto& s : paths)
-        all += s;
-    return all;
 }
