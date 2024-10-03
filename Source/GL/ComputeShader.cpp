@@ -1,5 +1,6 @@
 #include "ComputeShader.hpp"
 #include "ShaderSourceProcessing.h"
+#include "GLSLPreprocessor.h"
 #include "glad.h"
 #include "gtc/type_ptr.hpp"
 
@@ -24,7 +25,7 @@ ComputeShader::ComputeShader(const std::string& source)
 
 ComputeShader ComputeShader::FromFile(const std::string& path)
 {
-    const std::string source = ProcessShaderSource(path);
+    const std::string source = ProcessShader(path);
     return ComputeShader(source);
 }
 

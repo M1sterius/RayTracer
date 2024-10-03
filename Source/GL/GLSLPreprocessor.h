@@ -30,8 +30,9 @@ namespace preputils
     }
 
     /*
-     * Returns a string containing all lines of the file at path
-     * appended with new line character
+     * Returns a string that contains all lines of the file at path
+     * NOTE: All lines in the file are appended with newline character to
+     * make sure that the GLSL compiler will interpret them correctly
      */
     inline std::string LoadFile(const std::string& path)
     {
@@ -40,7 +41,7 @@ namespace preputils
 
         std::ifstream file(path);
         if (!file.is_open())
-            throw std::runtime_error("Unable to open the source file at: " + path);
+            throw std::runtime_error("GLSL PREPROCESSOR ERROR: Unable to open the source file at: " + path);
 
         while (std::getline(file, line))
             temp += (line + '\n');
@@ -65,34 +66,45 @@ namespace preputils
     }
 
     /*
-     * Takes in a string containing an include directive and
-     * returns an extracted file path
+     * Takes in a string that contains an include directive and
+     * returns extracted file path
      */
     inline std::string ParseIncludeDirective(const std::string& directive)
     {
-        const size_t quotesPos = directive.find('"', 0) + 1;
-        return directive.substr(quotesPos, directive.length() - (quotesPos + 1));
+        const size_t pathPos = directive.find('"', 0) + 1;
+        return directive.substr(pathPos, directive.length() - (pathPos + 1));
     }
 
+    /*
+     * Replaces all #include directives with the contents of the corresponding .glsl
+     * file until there are no unresolved #include directives left
+     */
     inline void ResolveIncludes(std::string& main)
     {
+        static constexpr size_t SAFE_LIMIT = 1024;
+
+        size_t iterCount = 0;
         size_t pos = 0;
         while ((pos = main.find(INCLUDE_DIRECTIVE)) != std::string::npos)
         {
             const auto directive = main.substr(pos, main.find('\n', pos) - pos);
             const auto path = ParseIncludeDirective(directive);
             ReplaceInString(main, directive, LoadFile(path));
+
+            if (iterCount > SAFE_LIMIT)
+                throw std::runtime_error("GLSL PREPROCESSOR ERROR: Exceeded the maximum number of include directives");
+            iterCount++;
         }
     }
 }
 
 /**
- * @brief Resolves all #include directives in the shader at the give path\n
+ * @brief Resolves all #include directives in the shader at the given path\n
  * NOTE: All include file paths in shaders must be specified relative to the executable
  * that uses this preprocessor
  * @param shaderPath The path to the shader that will be processed
  * @return The shader main file with all #include directives replaced with
- * the contents of the corresponding incliuded files
+ * the contents of the corresponding included files
  */
 inline std::string ProcessShader(const std::string& shaderPath)
 {

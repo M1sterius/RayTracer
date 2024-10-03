@@ -1,5 +1,8 @@
 #version 460 core
 
+#include "Resources/Shaders/Ray.glsl"
+#include "Resources/Shaders/Random.glsl"
+
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D u_OutputTexture;
 
@@ -10,11 +13,6 @@ void WritePixelColor(ivec2 coord, vec3 color)
 
 uniform vec2 u_ScreenSize;
 uniform float u_Time;
-
-// Constants
-const float PI = 3.14159265359;
-const float POSITIVE_INF = 1.0 / 0.0;
-const float NEGATIVE_INF = -1.0 / 0.0;
 
 // Screen
 float aspect = u_ScreenSize.x / u_ScreenSize.y;
@@ -31,23 +29,16 @@ const vec3 cameraRight = vec3(1.0, 0, 0.0);
 const float tanFOVY = tan(FOVY / 2);
 vec2 halfViewportSize = vec2(tanFOVY * aspect, tanFOVY) * focalLength;
 
-float RandomFloat(inout uint state)
+Ray CalcRay(vec2 uv)
 {
-    state = state * 747796405 + 2891336453;
-    uint result = ((state >> ((state >> 28) + 4)) ^ state) * 277803737;
-    result = (result >> 22) ^ result;
-    return result / 4294967295.0;
-}
+    Ray ray;
+    ray.origin = cameraPos;
+    const vec2 screenSpaceViewport = halfViewportSize * uv;
 
-struct Ray
-{
-    vec3 origin;
-    vec3 direction;
-};
+    ray.direction = normalize(cameraRight * screenSpaceViewport.x + cameraUp *
+    screenSpaceViewport.y + cameraForward);
 
-vec3 GetPointOnRay(Ray ray, float t)
-{
-    return ray.origin + ray.direction * t;
+    return ray;
 }
 
 struct HitInfo
@@ -56,18 +47,6 @@ struct HitInfo
     vec3 hitPoint;
     vec3 normal;
 };
-
-Ray CalcRay(vec2 uv)
-{
-    Ray ray;
-    ray.origin = cameraPos;
-    const vec2 screenSpaceViewport = halfViewportSize * uv;
-
-    ray.direction = normalize(cameraRight * screenSpaceViewport.x + cameraUp *
-        screenSpaceViewport.y + cameraForward);
-
-    return ray;
-}
 
 struct Material
 {
@@ -139,8 +118,8 @@ void main()
 
     color += TraceSpheresArray(ray);
 
-//    uint pixelIndex = texelCoord.x * texelCoord.y;
-//    color += vec3(RandomFloat(pixelIndex), RandomFloat(pixelIndex), RandomFloat(pixelIndex));
+    uint pixelIndex = texelCoord.x * texelCoord.y;
+    color += RandomDirection(pixelIndex);
 
     WritePixelColor(texelCoord, color);
 }
