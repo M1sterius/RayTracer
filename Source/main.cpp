@@ -8,13 +8,16 @@
 
 int32_t main(int32_t argc, char* argv[])
 {
-    auto window = Window(2560, 1440, "RayTracer");
-    auto rayTracer = RayTracer(window);
+    std::string directive = "#define symbol definition \n #define symbol1 definition";
+    preputils::ResolveDefines(directive);
 
-    while (!window.ShouldClose())
-    {
-        window.Clear();
-        rayTracer.Update();
-        window.SwapBuffers();
-    }
+    // auto window = Window(2560, 1440, "RayTracer");
+    // auto rayTracer = RayTracer(window);
+    //
+    // while (!window.ShouldClose())
+    // {
+    //     window.Clear();
+    //     rayTracer.Update();
+    //     window.SwapBuffers();
+    // }
 }
