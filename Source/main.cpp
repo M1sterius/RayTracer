@@ -8,8 +8,15 @@
 
 int32_t main(int32_t argc, char* argv[])
 {
-    std::string directive = "#define symbol definition \n #define symbol1 definition";
-    preputils::ResolveDefines(directive);
+    std::string text = preputils::LoadFile("Resources/Shaders/Random.glsl");
+    const auto table = preputils::ResolveDefines(text);
+
+    for (const auto& pair : table)
+        printf("%s %s \n", pair.first.c_str(), pair.second.c_str());
+
+    std::cout << text;
+
+
 
     // auto window = Window(2560, 1440, "RayTracer");
     // auto rayTracer = RayTracer(window);
@@ -21,3 +28,6 @@ int32_t main(int32_t argc, char* argv[])
     //     window.SwapBuffers();
     // }
 }
+
+
+

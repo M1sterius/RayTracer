@@ -5,12 +5,6 @@
  * #include directive in GLSL shaders
  */
 
-/*
- * You can modify this line to include whatever
- * OpenGL functions loader you use
- */
-#include "glad.h"
-
 #include <string>
 #include <vector>
 #include <fstream>
@@ -126,12 +120,19 @@ namespace preputils
 
         size_t iterCount = 0;
         size_t pos = 0;
+
+        /*
+         * Loop until no more #include directives are found
+         * Upon encountering one, parse it to get the path to file and replace
+         * the directive with the content of that file
+         */
         while ((pos = main.find(INCLUDE_DIRECTIVE)) != std::string::npos)
         {
             const auto directive = main.substr(pos, main.find('\n', pos) - pos);
             const auto path = ParseIncludeDirective(directive);
             ReplaceInString(main, directive, LoadFile(path));
 
+            // Check for loop iterations limit to avoid being stuck because of self-includes
             if (iterCount > SAFE_LIMIT)
                 throw std::runtime_error("GLSL PREPROCESSOR ERROR: Exceeded the maximum number of include directives");
             iterCount++;
@@ -141,15 +142,36 @@ namespace preputils
     inline std::unordered_map<std::string, std::string> ResolveDefines(std::string& text)
     {
         std::unordered_map<std::string, std::string> definesTable;
+        std::vector<std::string> defineLines;
 
-        for (const auto& line : SplitByCharacter(text, '\n'))
+        size_t beginPos = 0;
+        size_t endPos = 0;
+
+        /*
+         * Loop over all lines in the text, check if the current line contains a
+         * #define directive, and if so, parse it and save the definition and the value into the table
+         */
+        while (endPos != std::string::npos)
         {
-            size_t pos = 0;
-            if ((pos = text.find(DEFINE_DIRECTIVE)) != std::string::npos)
+            endPos = text.find('\n', beginPos + 1);
+            auto line = text.substr(beginPos + 1, endPos - beginPos);
+            beginPos = endPos;
+
+            if (line.find(DEFINE_DIRECTIVE) != std::string::npos)
             {
-                const auto directive = line.substr(pos, line.find('\n', pos) - pos);
+                defineLines.push_back(line);
+                ReplaceInString(line, "\n", "");
+                const auto define = ParseDefineDirective(line);
+                definesTable[define.first] = define.second;
             }
         }
+
+        /*
+         * Replace all lines that contain #define with an empty string because they
+         * are no longer needed
+         */
+        for (const auto& line : defineLines)
+            ReplaceInString(text, line, "");
 
         return definesTable;
     }

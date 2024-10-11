@@ -1,5 +1,8 @@
 #include "Resources/Shaders/Constants.glsl"
 
+#define TEST_VAL 69
+#define TEST_DEF
+
 float RandomFloat(inout uint state)
 {
     state = state * 747796405 + 2891336453;
