@@ -142,7 +142,7 @@ namespace preputils
     inline std::unordered_map<std::string, std::string> ResolveDefines(std::string& text)
     {
         std::unordered_map<std::string, std::string> definesTable;
-        std::vector<std::string> defineLines;
+        std::string reconstructedString;
 
         size_t beginPos = 0;
         size_t endPos = 0;
@@ -154,24 +154,25 @@ namespace preputils
         while (endPos != std::string::npos)
         {
             endPos = text.find('\n', beginPos + 1);
-            auto line = text.substr(beginPos + 1, endPos - beginPos);
+            auto line = text.substr(beginPos, endPos - beginPos);
             beginPos = endPos;
 
             if (line.find(DEFINE_DIRECTIVE) != std::string::npos)
             {
-                defineLines.push_back(line);
                 ReplaceInString(line, "\n", "");
                 const auto define = ParseDefineDirective(line);
                 definesTable[define.first] = define.second;
+                continue;
             }
+
+            reconstructedString += line;
         }
 
         /*
-         * Replace all lines that contain #define with an empty string because they
-         * are no longer needed
+         * Reconstruct the initial string without the lines containing #define
+         * because they are no longer needed
          */
-        for (const auto& line : defineLines)
-            ReplaceInString(text, line, "");
+        text = reconstructedString;
 
         return definesTable;
     }
@@ -200,16 +201,3 @@ inline std::string ProcessShader(const std::string& shaderPath)
 // {
 //     const std::vector<std::string> paths = preputils::UnpackVariadicArgs(rest...);
 // }
-
-/*
- * 1) Read the main file
- * 2) Start searching in it for #include
- * 3) Upon encountering #include, parse it and load the included file
- * 4) Search for #define in the included file
- * 5) Add all defined symbols to a dictionary
- * 6) Evaluate the defined symbols inside the loaded file
- * 7) Evaluate all #ifdef statements inside the loaded file
- * 8) Copy the contents of the loaded file into the main file
- * 9) Add symbols defined in the loaded file to global dictionary of defined symbols
- * 10)
- */

@@ -13,10 +13,9 @@ int32_t main(int32_t argc, char* argv[])
 
     for (const auto& pair : table)
         printf("%s %s \n", pair.first.c_str(), pair.second.c_str());
+    printf("%s\n", "--------------------------------------------");
 
     std::cout << text;
-
-
 
     // auto window = Window(2560, 1440, "RayTracer");
     // auto rayTracer = RayTracer(window);
