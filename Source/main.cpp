@@ -8,25 +8,18 @@
 
 int32_t main(int32_t argc, char* argv[])
 {
-    std::string text = preputils::LoadFile("Resources/Shaders/Random.glsl");
-    const auto table = preputils::ResolveDefines(text);
+    const auto s = ProcessShader("Resources/Shaders/RayTracingShader.glsl",
+        "Resources/Shaders"
+    );
+    printf(s.c_str());
 
-    for (const auto& pair : table)
-        printf("%s %s \n", pair.first.c_str(), pair.second.c_str());
-    printf("%s\n", "--------------------------------------------");
+    auto window = Window(2560, 1440, "RayTracer");
+    auto rayTracer = RayTracer(window);
 
-    std::cout << text;
-
-    // auto window = Window(2560, 1440, "RayTracer");
-    // auto rayTracer = RayTracer(window);
-    //
-    // while (!window.ShouldClose())
-    // {
-    //     window.Clear();
-    //     rayTracer.Update();
-    //     window.SwapBuffers();
-    // }
+    while (!window.ShouldClose())
+    {
+        window.Clear();
+        rayTracer.Update();
+        window.SwapBuffers();
+    }
 }
-
-
-

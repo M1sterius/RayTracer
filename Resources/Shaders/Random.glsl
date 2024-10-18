@@ -1,7 +1,7 @@
-#include "Resources/Shaders/Constants.glsl"
+#ifndef RANDOM_
+#define RANDOM_
 
-#define TEST_VAL 69
-#define TEST_DEF
+#include "Constants.glsl"
 
 float RandomFloat(inout uint state)
 {
@@ -25,3 +25,5 @@ vec3 RandomDirection(inout uint state)
     float z = RandomValueNormalDistribution(state);
     return normalize(vec3(x, y, z));
 }
+
+#endif

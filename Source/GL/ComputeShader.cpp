@@ -25,7 +25,7 @@ ComputeShader::ComputeShader(const std::string& source)
 
 ComputeShader ComputeShader::FromFile(const std::string& path)
 {
-    const std::string source = ProcessShader(path);
+    const std::string source = ProcessShader(path, "Resources/Shaders");
     return ComputeShader(source);
 }
 

@@ -1,7 +1,11 @@
 #version 460 core
 
-#include "Resources/Shaders/Ray.glsl"
-#include "Resources/Shaders/Random.glsl"
+#ifndef RAY_TRACING_SHADER_
+#define RAY_TRACING_SHADER_
+
+#include "Ray.glsl"
+#include "Random.glsl"
+#include "Constants.glsl"
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D u_OutputTexture;
@@ -123,3 +127,5 @@ void main()
 
     WritePixelColor(texelCoord, color);
 }
+
+#endif

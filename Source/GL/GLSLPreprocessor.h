@@ -8,16 +8,11 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <iostream>
 #include <algorithm>
-#include <unordered_map>
 
 namespace preputils
 {
     inline const std::string INCLUDE_DIRECTIVE = "#include";
-    inline const std::string DEFINE_DIRECTIVE = "#define";
-    inline const std::string IFDEF_DIRECTIVE = "#ifdef";
-    inline const std::string IFNDEF_DIRECTIVE = "#ifndef";
 
     /*
      * A utility function that helps unpack variadic arguments into a std::vector
@@ -96,25 +91,31 @@ namespace preputils
         return directive.substr(pathPos, directive.length() - (pathPos + 1));
     }
 
-    /*
-     * Takes in a string that contains a define directive and returns
-     * a std::pair that stores the symbol in the first element
-     * and the definition in the second elements
-     */
-    inline std::pair<std::string, std::string> ParseDefineDirective(const std::string& directive)
+    inline std::string FindFileInDirs(const std::string& path, const std::vector<std::string>& dirs)
     {
-        auto split = SplitByCharacter(directive);
-        split.erase(std::remove(split.begin(), split.end(), ""), split.end());
-        if (split.size() < 3)
-            return {split[1], ""};
-        return {split[1], split[2]};
+        std::string source;
+
+        try { source = LoadFile(path); }
+        catch (const std::exception&)
+        {
+            for (const auto& dir : dirs)
+            {
+                try {source = LoadFile(dir + "/" + path); }
+                catch (const std::exception&) { continue; }
+                return source;
+            }
+
+            throw std::runtime_error("Error! Unable to find: " + path + " in include directories.");
+        }
+
+        return source;
     }
 
     /*
      * Replaces all #include directives with the contents of the corresponding .glsl
      * file until there are no unresolved #include directives left
      */
-    inline void ResolveIncludes(std::string& main)
+    inline void ResolveIncludes(std::string& main, const std::vector<std::string>& dirs)
     {
         static constexpr size_t SAFE_LIMIT = 1024;
 
@@ -130,7 +131,9 @@ namespace preputils
         {
             const auto directive = main.substr(pos, main.find('\n', pos) - pos);
             const auto path = ParseIncludeDirective(directive);
-            ReplaceInString(main, directive, LoadFile(path));
+
+            auto fileSource = FindFileInDirs(path, dirs);
+            ReplaceInString(main, directive, fileSource);
 
             // Check for loop iterations limit to avoid being stuck because of self-includes
             if (iterCount > SAFE_LIMIT)
@@ -138,58 +141,21 @@ namespace preputils
             iterCount++;
         }
     }
-
-    inline std::unordered_map<std::string, std::string> ResolveDefines(std::string& text)
-    {
-        std::unordered_map<std::string, std::string> definesTable;
-        std::string reconstructedString;
-
-        size_t beginPos = 0;
-        size_t endPos = 0;
-
-        /*
-         * Loop over all lines in the text, check if the current line contains a
-         * #define directive, and if so, parse it and save the definition and the value into the table
-         */
-        while (endPos != std::string::npos)
-        {
-            endPos = text.find('\n', beginPos + 1);
-            auto line = text.substr(beginPos, endPos - beginPos);
-            beginPos = endPos;
-
-            if (line.find(DEFINE_DIRECTIVE) != std::string::npos)
-            {
-                ReplaceInString(line, "\n", "");
-                const auto define = ParseDefineDirective(line);
-                definesTable[define.first] = define.second;
-                continue;
-            }
-
-            reconstructedString += line;
-        }
-
-        /*
-         * Reconstruct the initial string without the lines containing #define
-         * because they are no longer needed
-         */
-        text = reconstructedString;
-
-        return definesTable;
-    }
 }
 
 /**
  * @brief Resolves all #include directives in the shader at the given path\n
- * NOTE: All include file paths in shaders must be specified relative to the executable
- * that uses this preprocessor
- * @param shaderPath The path to the shader that will be processed
+ * @param mainPath The path to the shader that will be processed
+ * @param includeDirs The directories where the preprocessor will search for included files
  * @return The shader main file with all #include directives replaced with
  * the contents of the corresponding included files
  */
-inline std::string ProcessShader(const std::string& shaderPath)
+template<typename... Args>
+inline std::string ProcessShader(const std::string& mainPath, const Args&... includeDirs)
 {
-    auto source = preputils::LoadFile(shaderPath);
-    preputils::ResolveIncludes(source);
+    const auto unpackedDirs = preputils::UnpackVariadicArgs(includeDirs...);
+    auto source = preputils::LoadFile(mainPath);
+    preputils::ResolveIncludes(source, unpackedDirs);
     return source;
 }
 
@@ -200,4 +166,61 @@ inline std::string ProcessShader(const std::string& shaderPath)
 // inline std::string ProcessComputeShaders(const std::string& main, const Args&... rest)
 // {
 //     const std::vector<std::string> paths = preputils::UnpackVariadicArgs(rest...);
+// }
+
+// inline const std::string DEFINE_DIRECTIVE = "#define";
+// inline const std::string IFDEF_DIRECTIVE = "#ifdef";
+// inline const std::string IFNDEF_DIRECTIVE = "#ifndef";
+
+
+/*
+ * Takes in a string that contains a define directive and returns
+ * a std::pair that stores the symbol in the first element
+ * and the definition in the second elements
+ */
+// inline std::pair<std::string, std::string> ParseDefineDirective(const std::string& directive)
+// {
+//     auto split = SplitByCharacter(directive);
+//     split.erase(std::remove(split.begin(), split.end(), ""), split.end());
+//     if (split.size() < 3)
+//         return {split[1], ""};
+//     return {split[1], split[2]};
+// }
+//
+// inline std::unordered_map<std::string, std::string> FindDefines(std::string& text)
+// {
+//     std::unordered_map<std::string, std::string> definesTable;
+//     std::string reconstructedString;
+//
+//     size_t beginPos = 0;
+//     size_t endPos = 0;
+//
+//     /*
+//      * Loop over all lines in the text, check if the current line contains a
+//      * #define directive, and if so, parse it and save the definition and the value into the table
+//      */
+//     while (endPos != std::string::npos)
+//     {
+//         endPos = text.find('\n', beginPos + 1);
+//         auto line = text.substr(beginPos, endPos - beginPos);
+//         beginPos = endPos;
+//
+//         if (line.find(DEFINE_DIRECTIVE) != std::string::npos)
+//         {
+//             ReplaceInString(line, "\n", "");
+//             const auto define = ParseDefineDirective(line);
+//             definesTable[define.first] = define.second;
+//             continue;
+//         }
+//
+//         reconstructedString += line;
+//     }
+//
+//     /*
+//      * Reconstruct the initial string without the lines containing #define
+//      * because they are no longer needed
+//      */
+//     text = reconstructedString;
+//
+//     return definesTable;
 // }
