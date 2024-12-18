@@ -35,6 +35,7 @@ target_include_directories(RayTracer PRIVATE
     Source
     Source/Utilities
     Source/GL
+    Source/Objects
 )
 
 add_subdirectory(${DEPENDENCIES_DIR}/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)

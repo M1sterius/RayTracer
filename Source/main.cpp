@@ -1,7 +1,6 @@
 #include "Window.hpp"
 #include "RayTracer.hpp"
-#include "ComputeShader.hpp"
-#include "GLSLPreprocessor.h"
+#include "ShaderStructs.hpp"
 
 #include <iostream>
 #include <cstdint>
