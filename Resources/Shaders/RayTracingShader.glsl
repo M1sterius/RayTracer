@@ -153,7 +153,16 @@ void main()
     spheresCount++;
 
     Ray ray = CalcRay(uv);
-    vec3 color = Trace(ray, rngState);
+
+    vec3 color = vec3(0.0);
+    uint numRays = 4;
+
+    for (uint i = 0; i < numRays; i++)
+    {
+        color += Trace(ray, rngState);
+    }
+
+    color /= numRays;
 
     WritePixelColor(texelCoord, color);
 }
