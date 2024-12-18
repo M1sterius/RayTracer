@@ -26,4 +26,10 @@ vec3 RandomDirection(inout uint state)
     return normalize(vec3(x, y, z));
 }
 
+vec3 RandomHemisphereDirection(vec3 normal, inout uint state)
+{
+    vec3 dir = RandomDirection(state);
+    return dir * sign(dot(normal, dir));
+}
+
 #endif

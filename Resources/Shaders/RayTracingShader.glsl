@@ -52,16 +52,11 @@ struct HitInfo
     vec3 normal;
 };
 
-struct Material
-{
-    vec3 color;
-};
-
 struct Sphere
 {
     vec3 center;
     float radius;
-    Material material;
+    vec3 color;
 };
 
 HitInfo CheckSphereCollision(Sphere sphere, Ray ray)
@@ -98,7 +93,7 @@ vec3 TraceSpheresArray(Ray ray)
         if (hit.t > -1.0 && hit.t < closestHit.t)
         {
             closestHit = hit;
-            closestSphereColor = sphere.material.color * hit.normal;
+            closestSphereColor = sphere.color;
         }
     }
 
@@ -115,15 +110,12 @@ void main()
 
     Ray ray = CalcRay(uv);
 
-    spheres[0] = Sphere(vec3(0, 0.15, -4.0), 0.5, Material(vec3(1.0)));
+    spheres[0] = Sphere(vec3(0, 0.15, -4.0), 0.5, vec3(1.0, 0.0, 0.0));
     spheresCount++;
-    spheres[1] = Sphere(vec3(0, 0.15, -1), 0.05, Material(vec3(1.0)));
+    spheres[1] = Sphere(vec3(0, 0.15, -1), 0.05, vec3(0.0, 1.0, 0.0));
     spheresCount++;
 
     color += TraceSpheresArray(ray);
-
-    uint pixelIndex = texelCoord.x * texelCoord.y;
-    color += RandomDirection(pixelIndex);
 
     WritePixelColor(texelCoord, color);
 }
