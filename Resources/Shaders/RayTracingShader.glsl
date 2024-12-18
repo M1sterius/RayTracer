@@ -114,13 +114,13 @@ vec3 Trace(Ray ray, inout uint rngState)
     vec3 light = vec3(0.0);
     vec3 rayColor = vec3(1.0);
 
-    for (uint i = 0; i < 4; i++)
+    for (uint i = 0; i < 16; i++)
     {
         HitInfo hitInfo = CalculateRaySpheresCollision(ray);
         if (hitInfo.t > -1.0)
         {
             ray.origin = hitInfo.hitPoint;
-            ray.direction = RandomHemisphereDirection(hitInfo.normal, rngState);
+            ray.direction = -RandomHemisphereDirection(hitInfo.normal, rngState); // TODO: Figure out why it needs the minus to work
 
             Material material = hitInfo.material;
             vec3 emittedLight = material.emissionColor * material.emissionStrength;
@@ -143,13 +143,13 @@ void main()
     vec2 uv = fragCoord * 2.0 - 1;
     uint rngState = texelCoord.x * texelCoord.y;
 
-    spheres[0] = Sphere(vec3(-0.5, 0, -2.0), 0.3, Material(vec3(1.0, 0.0, 0.0), vec3(1.0), 1.0));
+    spheres[0] = Sphere(vec3(-0.5, 0.4, -2.0), 0.3, Material(vec3(1.0, 0.0, 0.0), vec3(0.0), 0.0));
     spheresCount++;
     spheres[1] = Sphere(vec3(0.2, 0, -2.0), 0.1, Material(vec3(0.4, 0.3, 0.2), vec3(0.0), 0.0));
     spheresCount++;
-    spheres[2] = Sphere(vec3(0.0, -0.15, -2.0), 0.1, Material(vec3(0.3, 0.5, 0.1), vec3(0.0), 0.0));
+    spheres[2] = Sphere(vec3(0.0, -0.15, -2.0), 0.1, Material(vec3(0.3, 0.5, 0.1), vec3(1.0), 1.0));
     spheresCount++;
-    spheres[3] = Sphere(vec3(0.0, -0.6, 0.0), 0.5, Material(vec3(0.2, 0.2, 0.8), vec3(0.0), 0.0));
+    spheres[3] = Sphere(vec3(0.3, -0.6, -2.3), 0.5, Material(vec3(1.0), vec3(0.0), 0.0));
     spheresCount++;
 
     Ray ray = CalcRay(uv);
