@@ -30,7 +30,7 @@ target_include_directories(RayTracer PRIVATE
     ${DEPENDENCIES_DIR}/glfw/include/GLFW
     ${DEPENDENCIES_DIR}/glad/include/glad
     ${DEPENDENCIES_DIR}/glad/include
-    ${DEPENDENCIES_DIR}/imgui/include
+    ${DEPENDENCIES_DIR}/imgui
 
     Source
     Source/Utilities

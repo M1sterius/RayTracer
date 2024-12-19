@@ -2,6 +2,9 @@
 #include "Window.hpp"
 #include "ShaderSourceProcessing.h"
 #include "glad.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 RayTracer::RayTracer(const Window& window)
     : m_Window(window), m_ScreenTextureHandle(0), m_VertexArrayHandle(0), m_IndexBufferHandle(0),
@@ -10,6 +13,14 @@ RayTracer::RayTracer(const Window& window)
     InitScreenQuad();
     InitScreenQuadShader();
     BindForQuadDraw();
+
+    m_GPUVendor = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+    m_DriverVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(m_Window.GetGLFWWindowPtr(), true);
+    ImGui_ImplOpenGL3_Init();
 
     m_Stopwatch = Stopwatch::StartNew();
     m_OldTime = 0;
@@ -29,6 +40,7 @@ void RayTracer::Update()
 
     DrawCompute();
     DrawScreenQuad();
+    DrawDebug();
 }
 
 void RayTracer::InitScreenQuad()
@@ -194,7 +206,22 @@ void RayTracer::DrawCompute()
 
     m_RayTracerShader.SetUniformVec2("u_ScreenSize", glm::vec2(m_Window.GetWidth(), m_Window.GetHeight()));
 //    m_RayTracerShader.SetUniform1f("u_Time", m_Stopwatch.GetElapsed().AsSecondsF());
+    m_RayTracerShader.SetUniform1i("u_MaxReflectionsCount", MaxReflectionsCount);
+    m_RayTracerShader.SetUniform1i("u_RaysPerPixel", RaysPerPixel);
 
     m_RayTracerShader.Dispatch(m_Window.GetWidth(), m_Window.GetHeight(), 1);
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
+}
+
+void RayTracer::DrawDebug()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    const auto fpsText = "FPS: " + std::to_string(1 / m_DeltaTime);
+    ImGui::Text("%s", fpsText.c_str());
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

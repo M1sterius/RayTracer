@@ -17,6 +17,8 @@ void WritePixelColor(ivec2 coord, vec3 color)
 
 uniform vec2 u_ScreenSize;
 uniform float u_Time;
+uniform uint u_MaxReflectionsCount;
+uniform uint u_RaysPerPixel;
 
 // Screen
 float aspect = u_ScreenSize.x / u_ScreenSize.y;
@@ -114,7 +116,7 @@ vec3 Trace(Ray ray, inout uint rngState)
     vec3 light = vec3(0.0);
     vec3 rayColor = vec3(1.0);
 
-    for (uint i = 0; i < 16; i++)
+    for (uint i = 0; i < u_MaxReflectionsCount; i++)
     {
         HitInfo hitInfo = CalculateRaySpheresCollision(ray);
         if (hitInfo.t > -1.0)
@@ -155,14 +157,13 @@ void main()
     Ray ray = CalcRay(uv);
 
     vec3 color = vec3(0.0);
-    uint numRays = 4;
 
-    for (uint i = 0; i < numRays; i++)
+    for (uint i = 0; i < u_RaysPerPixel; i++)
     {
         color += Trace(ray, rngState);
     }
 
-    color /= numRays;
+    color /= u_RaysPerPixel;
 
     WritePixelColor(texelCoord, color);
 }

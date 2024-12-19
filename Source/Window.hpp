@@ -17,6 +17,7 @@ public:
 
     inline size_t GetWidth() const { return m_Width; }
     inline size_t GetHeight() const { return m_Height; }
+    inline GLFWwindow* GetGLFWWindowPtr() const { return m_GLFWWindow; }
 private:
     GLFWwindow* m_GLFWWindow;
     size_t m_Width;
