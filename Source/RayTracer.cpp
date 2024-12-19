@@ -14,6 +14,8 @@ RayTracer::RayTracer(const Window& window)
     InitScreenQuadShader();
     BindForQuadDraw();
 
+    m_SSBO = SSBO();
+
     m_GPUVendor = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
     m_DriverVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
 
@@ -41,6 +43,12 @@ void RayTracer::Update()
     DrawCompute();
     DrawScreenQuad();
     DrawDebug();
+}
+
+void RayTracer::AddSphere(const Sphere& sphere)
+{
+    m_Spheres.push_back(sphere);
+    m_ShouldUpdateSSBO = true;
 }
 
 void RayTracer::InitScreenQuad()
@@ -208,6 +216,16 @@ void RayTracer::DrawCompute()
 //    m_RayTracerShader.SetUniform1f("u_Time", m_Stopwatch.GetElapsed().AsSecondsF());
     m_RayTracerShader.SetUniform1i("u_MaxReflectionsCount", MaxReflectionsCount);
     m_RayTracerShader.SetUniform1i("u_RaysPerPixel", RaysPerPixel);
+    m_RayTracerShader.SetUniform1i("u_SSBOSpheresCount", m_Spheres.size());
+
+    // Update SSBO
+    if (m_ShouldUpdateSSBO)
+    {
+        m_SSBO.UpdateData(m_Spheres.data(), m_Spheres.size() * sizeof(Sphere), 0);
+        m_ShouldUpdateSSBO = false;
+    }
+
+    m_SSBO.Bind(1);
 
     m_RayTracerShader.Dispatch(m_Window.GetWidth(), m_Window.GetHeight(), 1);
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -221,6 +239,14 @@ void RayTracer::DrawDebug()
 
     const auto fpsText = "FPS: " + std::to_string(1 / m_DeltaTime);
     ImGui::Text("%s", fpsText.c_str());
+
+    int IntMaxReflectionsCount = MaxReflectionsCount;
+    ImGui::SliderInt("Max ray reflections", &IntMaxReflectionsCount, 1, 100);
+    MaxReflectionsCount = IntMaxReflectionsCount;
+
+    int IntRaysPerPixel = RaysPerPixel;
+    ImGui::SliderInt("Rays per pixel", &IntRaysPerPixel, 1, 100);
+    RaysPerPixel = IntRaysPerPixel;
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

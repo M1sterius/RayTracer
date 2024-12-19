@@ -69,15 +69,21 @@ struct Sphere
     Material material;
 };
 
+layout(std430, binding = 1) buffer s_Spheres
+{
+    Sphere SSBO_spheres[];
+};
+uniform uint u_SSBOSpheresCount;
+
 HitInfo CheckSphereCollision(Sphere sphere, Ray ray)
 {
     HitInfo info;
 
-    vec3 oc = sphere.center - ray.origin;
-    float a = dot(ray.direction, ray.direction); // a way to calculate squared length
-    float h = dot(ray.direction, oc);
-    float c = dot(oc, oc) - sphere.radius * sphere.radius;
-    float disc = h * h - a * c;
+    const vec3 oc = sphere.center - ray.origin;
+    const float a = dot(ray.direction, ray.direction); // a way to calculate squared length
+    const float h = dot(ray.direction, oc);
+    const float c = dot(oc, oc) - sphere.radius * sphere.radius;
+    const float disc = h * h - a * c;
 
     info.t = disc < 0 ? -1.0 : ((h - sqrt(disc)) / a);
     info.hitPoint = GetPointOnRay(ray, info.t);
@@ -87,17 +93,17 @@ HitInfo CheckSphereCollision(Sphere sphere, Ray ray)
     return info;
 }
 
-const uint spheresMaxCount = 100;
-Sphere spheres[spheresMaxCount];
-uint spheresCount = 0;
+//const uint spheresMaxCount = 100;
+//Sphere spheres[spheresMaxCount];
+//uint spheresCount = 0;
 
 HitInfo CalculateRaySpheresCollision(Ray ray)
 {
     HitInfo closestHit = HitInfo(POSITIVE_INF, vec3(0.0), vec3(0.0), Material(vec3(0.0), vec3(0.0), 0.0));
 
-    for (uint i = 0; i < spheresCount; i++)
+    for (uint i = 0; i < u_SSBOSpheresCount; i++)
     {
-        Sphere sphere = spheres[i];
+        Sphere sphere = SSBO_spheres[i];
         HitInfo hit = CheckSphereCollision(sphere, ray);
 
         bool didHit = hit.t > -1.0;
@@ -145,14 +151,14 @@ void main()
     vec2 uv = fragCoord * 2.0 - 1;
     uint rngState = texelCoord.x * texelCoord.y;
 
-    spheres[0] = Sphere(vec3(-0.5, 0.4, -2.0), 0.3, Material(vec3(1.0, 0.0, 0.0), vec3(0.0), 0.0));
-    spheresCount++;
-    spheres[1] = Sphere(vec3(0.2, 0, -2.0), 0.1, Material(vec3(0.4, 0.3, 0.2), vec3(0.0), 0.0));
-    spheresCount++;
-    spheres[2] = Sphere(vec3(0.0, -0.15, -2.0), 0.1, Material(vec3(0.3, 0.5, 0.1), vec3(1.0), 1.0));
-    spheresCount++;
-    spheres[3] = Sphere(vec3(0.3, -0.6, -2.3), 0.5, Material(vec3(1.0), vec3(0.0), 0.0));
-    spheresCount++;
+//    spheres[0] = Sphere(vec3(-0.5, 0.4, -2.0), 0.3, Material(vec3(1.0, 0.0, 0.0), vec3(0.0), 0.0));
+//    spheresCount++;
+//    spheres[1] = Sphere(vec3(0.2, 0, -2.0), 0.1, Material(vec3(0.4, 0.3, 0.2), vec3(0.0), 0.0));
+//    spheresCount++;
+//    spheres[2] = Sphere(vec3(0.0, -0.15, -2.0), 0.1, Material(vec3(0.3, 0.5, 0.1), vec3(1.0), 1.0));
+//    spheresCount++;
+//    spheres[3] = Sphere(vec3(0.3, -0.6, -2.3), 0.5, Material(vec3(1.0), vec3(0.0), 0.0));
+//    spheresCount++;
 
     Ray ray = CalcRay(uv);
 

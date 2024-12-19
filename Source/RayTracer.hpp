@@ -2,8 +2,11 @@
 
 #include "ComputeShader.hpp"
 #include "Stopwatch.h"
+#include "ShaderStructs.hpp"
+#include "SSBO.hpp"
 
 #include <memory>
+#include <vector>
 
 class Window;
 
@@ -17,6 +20,8 @@ public:
 
     uint32_t MaxReflectionsCount = 4;
     uint32_t RaysPerPixel = 1;
+
+    void AddSphere(const Sphere& sphere);
 private:
     void InitScreenQuad();
     void InitScreenQuadShader();
@@ -32,6 +37,10 @@ private:
 
     const char* m_GPUVendor;
     const char* m_DriverVersion;
+
+    std::vector<Sphere> m_Spheres;
+    SSBO m_SSBO;
+    bool m_ShouldUpdateSSBO = true;
 
     Stopwatch m_Stopwatch;
     double m_OldTime;
