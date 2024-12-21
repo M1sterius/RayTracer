@@ -7,7 +7,7 @@
 #include "Random.glsl"
 #include "Constants.glsl"
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D u_OutputTexture;
 
 void WritePixelColor(ivec2 coord, vec3 color)
@@ -47,11 +47,20 @@ Ray CalcRay(vec2 uv)
     return ray;
 }
 
+// vec4s are used for alignment reasons only
 struct Material
 {
-    vec3 color;
-    vec3 emissionColor;
+    vec4 color;
+    vec4 emissionColor;
     float emissionStrength;
+    float smoothness;
+};
+
+struct Sphere
+{
+    vec3 center;
+    float radius;
+    Material material;
 };
 
 struct HitInfo
@@ -62,14 +71,7 @@ struct HitInfo
     Material material;
 };
 
-struct Sphere
-{
-    vec3 center;
-    float radius;
-    Material material;
-};
-
-layout(std430, binding = 1) buffer s_Spheres
+layout(std430, binding = 1) buffer s_SpheresBuffer
 {
     Sphere SSBO_spheres[];
 };
@@ -93,13 +95,9 @@ HitInfo CheckSphereCollision(Sphere sphere, Ray ray)
     return info;
 }
 
-//const uint spheresMaxCount = 100;
-//Sphere spheres[spheresMaxCount];
-//uint spheresCount = 0;
-
 HitInfo CalculateRaySpheresCollision(Ray ray)
 {
-    HitInfo closestHit = HitInfo(POSITIVE_INF, vec3(0.0), vec3(0.0), Material(vec3(0.0), vec3(0.0), 0.0));
+    HitInfo closestHit = HitInfo(POSITIVE_INF, vec3(0.0), vec3(0.0), Material(vec4(0.0), vec4(0.0), 0.0, 0.0));
 
     for (uint i = 0; i < u_SSBOSpheresCount; i++)
     {
@@ -131,9 +129,9 @@ vec3 Trace(Ray ray, inout uint rngState)
             ray.direction = -RandomHemisphereDirection(hitInfo.normal, rngState); // TODO: Figure out why it needs the minus to work
 
             Material material = hitInfo.material;
-            vec3 emittedLight = material.emissionColor * material.emissionStrength;
+            vec3 emittedLight = vec3(material.emissionColor * material.emissionStrength);
             light += emittedLight * rayColor;
-            rayColor *= material.color;
+            rayColor *= vec3(material.color);
         }
         else
         {
@@ -150,15 +148,6 @@ void main()
     vec2 fragCoord = vec2(texelCoord).xy / u_ScreenSize.xy;
     vec2 uv = fragCoord * 2.0 - 1;
     uint rngState = texelCoord.x * texelCoord.y;
-
-//    spheres[0] = Sphere(vec3(-0.5, 0.4, -2.0), 0.3, Material(vec3(1.0, 0.0, 0.0), vec3(0.0), 0.0));
-//    spheresCount++;
-//    spheres[1] = Sphere(vec3(0.2, 0, -2.0), 0.1, Material(vec3(0.4, 0.3, 0.2), vec3(0.0), 0.0));
-//    spheresCount++;
-//    spheres[2] = Sphere(vec3(0.0, -0.15, -2.0), 0.1, Material(vec3(0.3, 0.5, 0.1), vec3(1.0), 1.0));
-//    spheresCount++;
-//    spheres[3] = Sphere(vec3(0.3, -0.6, -2.3), 0.5, Material(vec3(1.0), vec3(0.0), 0.0));
-//    spheresCount++;
 
     Ray ray = CalcRay(uv);
 

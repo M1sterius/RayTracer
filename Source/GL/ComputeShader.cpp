@@ -34,6 +34,17 @@ ComputeShader ComputeShader::FromSource(const std::string& source)
     return ComputeShader(source);
 }
 
+ComputeShader* ComputeShader::FromFilePtr(const std::string &path)
+{
+    const std::string source = ProcessShader(path, "Resources/Shaders");
+    return new ComputeShader(source);
+}
+
+ComputeShader* ComputeShader::FromSourcePtr(const std::string &source)
+{
+    return new ComputeShader(source);
+}
+
 ComputeShader::~ComputeShader()
 {
     glDeleteProgram(m_Handle);

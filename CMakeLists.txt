@@ -23,8 +23,7 @@ add_executable(RayTracer
     Source/GL/ComputeShader.cpp
     Source/Utilities/Stopwatch.h
     Source/GL/GLSLPreprocessor.h
-        Source/GL/SSBO.cpp
-        Source/GL/SSBO.hpp
+    Source/GL/SSBO.cpp
 )
 
 target_include_directories(RayTracer PRIVATE

@@ -21,7 +21,7 @@ public:
     uint32_t MaxReflectionsCount = 4;
     uint32_t RaysPerPixel = 1;
 
-    void AddSphere(const Sphere& sphere);
+    void AddSphere(Sphere sphere);
 private:
     void InitScreenQuad();
     void InitScreenQuadShader();
@@ -39,13 +39,13 @@ private:
     const char* m_DriverVersion;
 
     std::vector<Sphere> m_Spheres;
-    SSBO m_SSBO;
+    std::unique_ptr<SSBO> m_SSBO;
     bool m_ShouldUpdateSSBO = true;
 
     Stopwatch m_Stopwatch;
     double m_OldTime;
     double m_DeltaTime;
 
-    ComputeShader m_RayTracerShader;
+    std::unique_ptr<ComputeShader> m_RayTracerShader;
     const Window& m_Window;
 };

@@ -11,6 +11,8 @@ class ComputeShader
 public:
     static ComputeShader FromFile(const std::string& path);
     static ComputeShader FromSource(const std::string& source);
+    static ComputeShader* FromFilePtr(const std::string& path);
+    static ComputeShader* FromSourcePtr(const std::string& source);
 
     ~ComputeShader();
 

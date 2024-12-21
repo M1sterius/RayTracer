@@ -8,21 +8,18 @@
 
 RayTracer::RayTracer(const Window& window)
     : m_Window(window), m_ScreenTextureHandle(0), m_VertexArrayHandle(0), m_IndexBufferHandle(0),
-      m_ScreenShaderHandle(0), m_RayTracerShader(ComputeShader::FromFile("Resources/Shaders/RayTracingShader.glsl"))
+      m_ScreenShaderHandle(0)
 {
     InitScreenQuad();
     InitScreenQuadShader();
     BindForQuadDraw();
 
-    m_SSBO = SSBO();
+    m_RayTracerShader = std::unique_ptr<ComputeShader>(ComputeShader::FromFilePtr("Resources/Shaders/RayTracingShader.glsl"));
+    m_SSBO = std::make_unique<SSBO>();
+    m_SSBO->BindToSlot(1);
 
     m_GPUVendor = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
     m_DriverVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
-
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(m_Window.GetGLFWWindowPtr(), true);
-    ImGui_ImplOpenGL3_Init();
 
     m_Stopwatch = Stopwatch::StartNew();
     m_OldTime = 0;
@@ -45,10 +42,10 @@ void RayTracer::Update()
     DrawDebug();
 }
 
-void RayTracer::AddSphere(const Sphere& sphere)
+void RayTracer::AddSphere(Sphere sphere)
 {
     m_Spheres.push_back(sphere);
-    m_ShouldUpdateSSBO = true;
+    m_SSBO->UpdateData(m_Spheres.data(), m_Spheres.size() * sizeof(Sphere), 0);
 }
 
 void RayTracer::InitScreenQuad()
@@ -85,26 +82,26 @@ void RayTracer::InitScreenQuad()
 
     unsigned int VBO;
     glGenVertexArrays(1, &m_VertexArrayHandle);
-    glGenBuffers(1, &VBO);
     glGenBuffers(1, &m_IndexBufferHandle);
+    glGenBuffers(1, &VBO);
 
     glBindVertexArray(m_VertexArrayHandle);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferHandle);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
     // Specify vertex attribute for position (layout = 0 in shader)
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
 
     // Specify vertex attribute for texture coordinates (layout = 1 in shader)
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
     glBindVertexArray(0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferHandle);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
@@ -210,24 +207,15 @@ void RayTracer::DrawScreenQuad() const
 
 void RayTracer::DrawCompute()
 {
-    m_RayTracerShader.Bind();
+    m_RayTracerShader->Bind();
 
-    m_RayTracerShader.SetUniformVec2("u_ScreenSize", glm::vec2(m_Window.GetWidth(), m_Window.GetHeight()));
-//    m_RayTracerShader.SetUniform1f("u_Time", m_Stopwatch.GetElapsed().AsSecondsF());
-    m_RayTracerShader.SetUniform1i("u_MaxReflectionsCount", MaxReflectionsCount);
-    m_RayTracerShader.SetUniform1i("u_RaysPerPixel", RaysPerPixel);
-    m_RayTracerShader.SetUniform1i("u_SSBOSpheresCount", m_Spheres.size());
+    m_RayTracerShader->SetUniformVec2("u_ScreenSize", glm::vec2(m_Window.GetWidth(), m_Window.GetHeight()));
+//    m_RayTracerShader->SetUniform1f("u_Time", m_Stopwatch.GetElapsed().AsSecondsF());
+    m_RayTracerShader->SetUniform1i("u_MaxReflectionsCount", MaxReflectionsCount);
+    m_RayTracerShader->SetUniform1i("u_RaysPerPixel", RaysPerPixel);
+    m_RayTracerShader->SetUniform1i("u_SSBOSpheresCount", m_Spheres.size());
 
-    // Update SSBO
-    if (m_ShouldUpdateSSBO)
-    {
-        m_SSBO.UpdateData(m_Spheres.data(), m_Spheres.size() * sizeof(Sphere), 0);
-        m_ShouldUpdateSSBO = false;
-    }
-
-    m_SSBO.Bind(1);
-
-    m_RayTracerShader.Dispatch(m_Window.GetWidth(), m_Window.GetHeight(), 1);
+    m_RayTracerShader->Dispatch(m_Window.GetWidth() / 8, m_Window.GetHeight() / 8, 1);
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 }
 

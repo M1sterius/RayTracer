@@ -2,14 +2,16 @@
 
 #include "glm.hpp"
 
-struct Material
+// vec4s are used for alignment reasons only
+struct alignas(16) Material
 {
-    glm::vec3 color;
-    glm::vec3 emissionColor;
+    glm::vec4 color;
+    glm::vec4 emissionColor;
     float emissionStrength;
+    float smoothness;
 };
 
-struct Sphere
+struct alignas(16) Sphere
 {
     glm::vec3 center;
     float radius;
