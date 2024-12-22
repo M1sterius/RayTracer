@@ -51,8 +51,7 @@ Ray CalcRay(vec2 uv)
 struct Material
 {
     vec4 color;
-    vec4 emissionColor;
-    float emissionStrength;
+    vec4 emission; // xyz - emission color, w - emission strength
     float smoothness;
 };
 
@@ -97,7 +96,7 @@ HitInfo CheckSphereCollision(Sphere sphere, Ray ray)
 
 HitInfo CalculateRaySpheresCollision(Ray ray)
 {
-    HitInfo closestHit = HitInfo(POSITIVE_INF, vec3(0.0), vec3(0.0), Material(vec4(0.0), vec4(0.0), 0.0, 0.0));
+    HitInfo closestHit = HitInfo(POSITIVE_INF, vec3(0.0), vec3(0.0), Material(vec4(0.0), vec4(0.0), 0.0));
 
     for (uint i = 0; i < u_SSBOSpheresCount; i++)
     {
@@ -129,7 +128,7 @@ vec3 Trace(Ray ray, inout uint rngState)
             ray.direction = -RandomHemisphereDirection(hitInfo.normal, rngState); // TODO: Figure out why it needs the minus to work
 
             Material material = hitInfo.material;
-            vec3 emittedLight = vec3(material.emissionColor * material.emissionStrength);
+            vec3 emittedLight = vec3(material.emission.xyz * material.emission.w);
             light += emittedLight * rayColor;
             rayColor *= vec3(material.color);
         }

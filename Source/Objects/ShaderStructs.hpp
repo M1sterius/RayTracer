@@ -6,8 +6,7 @@
 struct alignas(16) Material
 {
     glm::vec4 color;
-    glm::vec4 emissionColor;
-    float emissionStrength;
+    glm::vec4 emission; // xyz - emission color, w - emission strength
     float smoothness;
 };
 
