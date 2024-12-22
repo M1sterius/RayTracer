@@ -43,10 +43,13 @@ add_subdirectory(${DEPENDENCIES_DIR}/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)
 
 find_package(OpenGL REQUIRED)
 
-target_link_libraries(RayTracer PRIVATE
-        OpenGL::GL
-        glfw
-)
+set(LINK_LIBRARIES OpenGL::GL glfw)
+
+if(WIN32)
+    list(APPEND LINK_LIBRARIES winmm)
+endif()
+
+target_link_libraries(RayTracer PRIVATE ${LINK_LIBRARIES})
 
 set(COPY_OUT_DIR ${CMAKE_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/Resources)
 add_custom_command(TARGET RayTracer POST_BUILD

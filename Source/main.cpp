@@ -1,7 +1,7 @@
 #include "Window.hpp"
 #include "RayTracer.hpp"
 #include "ShaderStructs.hpp"
-#include "SleepUtility.h"
+#include "SleepUtility.hpp"
 
 #include <iostream>
 #include <cstdint>

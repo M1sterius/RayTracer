@@ -34,7 +34,7 @@ Window::Window(const size_t width, const size_t height, const std::string& title
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     glfwSetWindowAttrib(m_GLFWWindow, GLFW_RESIZABLE, GLFW_FALSE);
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
 
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
