@@ -30,6 +30,9 @@ Window::Window(const size_t width, const size_t height, const std::string& title
     glfwMakeContextCurrent(m_GLFWWindow);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
+    m_GPUVendor = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+    m_DriverVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+
     glViewport(0, 0, static_cast<int>(m_Width), static_cast<int>(m_Height));
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 

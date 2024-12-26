@@ -23,6 +23,9 @@ private:
     size_t m_Width;
     size_t m_Height;
 
+    const char* m_GPUVendor;
+    const char* m_DriverVersion;
+
     static void gl_debug_output_callback(uint32_t source, uint32_t type, uint32_t id,
                                         uint32_t severity, int length,
                                         const char *message, const void* userParam);

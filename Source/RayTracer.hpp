@@ -4,6 +4,8 @@
 #include "Stopwatch.hpp"
 #include "ShaderStructs.hpp"
 #include "SSBO.hpp"
+#include "glm.hpp"
+#include "gtx/quaternion.hpp"
 
 #include <memory>
 #include <vector>
@@ -20,8 +22,12 @@ public:
 
     uint32_t MaxReflectionsCount = 10;
     uint32_t RaysPerPixel = 100;
+    float FOV = 3.14159 / 3;
+    float FocalLength = 1.0;
 
     void AddSphere(Sphere sphere);
+    void SetCamPosition(const glm::vec3& pos);
+    void SetCamRotation(const glm::quat& rot);
 private:
     void InitScreenQuad();
     void InitScreenQuadShader();
@@ -29,14 +35,12 @@ private:
     void DrawScreenQuad() const;
     void DrawCompute();
     void DrawDebug();
+    void UpdateCamTransform();
 
     unsigned int m_ScreenTextureHandle;
     unsigned int m_VertexArrayHandle;
     unsigned int m_IndexBufferHandle;
     unsigned int m_ScreenShaderHandle;
-
-    const char* m_GPUVendor;
-    const char* m_DriverVersion;
 
     std::vector<Sphere> m_Spheres;
     std::unique_ptr<SSBO> m_SSBO;
@@ -49,4 +53,12 @@ private:
 
     std::unique_ptr<ComputeShader> m_RayTracerShader;
     const Window& m_Window;
+
+    glm::vec3 m_CamPosition;
+    glm::quat m_CamRotation;
+    glm::mat4 m_CamViewMatrix;
+
+    static constexpr auto camForward = glm::vec4(0.0, 0.0, -1.0, 0.0);
+    static constexpr auto camUp = glm::vec4(0.0, 1.0, 0.0, 0.0);
+    static constexpr auto camRight = glm::vec4(1.0, 0.0, 0.0, 0.0);
 };

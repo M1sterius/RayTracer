@@ -2,6 +2,7 @@
 #include "Window.hpp"
 #include "ShaderSourceProcessing.h"
 #include "Random.hpp"
+#include "gtx/string_cast.hpp"
 #include "glad.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -19,12 +20,13 @@ RayTracer::RayTracer(const Window& window)
     m_SSBO = std::make_unique<SSBO>();
     m_SSBO->BindToSlot(1);
 
-    m_GPUVendor = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
-    m_DriverVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
-
     m_Stopwatch = Stopwatch::StartNew();
     m_OldTime = 0;
     m_DeltaTime = 0;
+
+    m_CamPosition = glm::vec3(0.0);
+    m_CamRotation = glm::identity<glm::quat>();
+    m_CamViewMatrix = glm::identity<glm::mat4>();
 }
 
 RayTracer::~RayTracer()
@@ -218,6 +220,11 @@ void RayTracer::DrawCompute()
 //    m_RayTracerShader->SetUniform1i("u_RandomSeed", GenerateRandomUint64(0, 0xFFFFFFFF));
     m_RayTracerShader->SetUniform1i("u_SSBOSpheresCount", m_Spheres.size());
 
+    m_RayTracerShader->SetUniformVec3("u_CameraPosition", m_CamPosition);
+    m_RayTracerShader->SetUniformVec3("u_CameraForward", glm::vec4(camForward) * m_CamViewMatrix);
+    m_RayTracerShader->SetUniformVec3("u_CameraUp", glm::vec4(camUp) * m_CamViewMatrix);
+    m_RayTracerShader->SetUniformVec3("u_CameraRight", glm::vec4(camRight) * m_CamViewMatrix);
+
     m_RayTracerShader->Dispatch(m_Window.GetWidth() / 8, m_Window.GetHeight() / 8, 1);
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 }
@@ -239,6 +246,32 @@ void RayTracer::DrawDebug()
     ImGui::SliderInt("Rays per pixel", &IntRaysPerPixel, 1, 100);
     RaysPerPixel = IntRaysPerPixel;
 
+    ImGui::SliderFloat("Cam FOV", &FOV, 0, glm::pi<float>() / 2);
+    ImGui::SliderFloat("Focal length", &FocalLength, 0.001, 10);
+
+    const auto camPosTxt = "Camera Position: " + glm::to_string(m_CamPosition);
+    ImGui::Text("%s", camPosTxt.c_str());
+    const auto camRotTxt = "Camera Rotation: " + glm::to_string(glm::degrees(glm::eulerAngles(m_CamRotation)));
+    ImGui::Text("%s", camRotTxt.c_str());
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void RayTracer::SetCamPosition(const glm::vec3& pos)
+{
+    m_CamPosition = pos;
+    UpdateCamTransform();
+}
+
+void RayTracer::SetCamRotation(const glm::quat& rot)
+{
+    m_CamRotation = rot;
+    UpdateCamTransform();
+}
+
+void RayTracer::UpdateCamTransform()
+{
+    m_CamViewMatrix = glm::mat4_cast(m_CamRotation);
+    m_CamViewMatrix = glm::translate(m_CamViewMatrix, m_CamPosition);
 }
