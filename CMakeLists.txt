@@ -21,7 +21,7 @@ add_executable(RayTracer
     Source/Window.cpp
     Source/RayTracer.cpp
     Source/GL/ComputeShader.cpp
-    Source/Utilities/Stopwatch.h
+    Source/Utilities/Stopwatch.hpp
     Source/GL/GLSLPreprocessor.h
     Source/GL/SSBO.cpp
 )

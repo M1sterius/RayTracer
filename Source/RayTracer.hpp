@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ComputeShader.hpp"
-#include "Stopwatch.h"
+#include "Stopwatch.hpp"
 #include "ShaderStructs.hpp"
 #include "SSBO.hpp"
 
@@ -18,8 +18,8 @@ public:
 
     void Update();
 
-    uint32_t MaxReflectionsCount = 4;
-    uint32_t RaysPerPixel = 1;
+    uint32_t MaxReflectionsCount = 10;
+    uint32_t RaysPerPixel = 100;
 
     void AddSphere(Sphere sphere);
 private:
@@ -45,6 +45,7 @@ private:
     Stopwatch m_Stopwatch;
     double m_OldTime;
     double m_DeltaTime;
+    uint32_t m_FrameIndex = 0;
 
     std::unique_ptr<ComputeShader> m_RayTracerShader;
     const Window& m_Window;

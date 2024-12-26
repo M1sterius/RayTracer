@@ -10,15 +10,23 @@
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D u_OutputTexture;
 
-void WritePixelColor(ivec2 coord, vec3 color)
-{
-    imageStore(u_OutputTexture, coord, vec4(color, 1.0));
-}
-
 uniform vec2 u_ScreenSize;
-uniform float u_Time;
 uniform uint u_MaxReflectionsCount;
 uniform uint u_RaysPerPixel;
+uniform uint u_FrameIndex;
+uniform uint u_RandomSeed;
+
+void WritePixelColor(ivec2 coord, vec3 color)
+{
+    vec3 prevColor = imageLoad(u_OutputTexture, coord).xyz;
+
+    float blend = 0.01;
+    vec3 col = prevColor * (1 - blend) + color * blend;
+
+//    vec3 col = prevColor + color;
+
+    imageStore(u_OutputTexture, coord, vec4(col, 1.0));
+}
 
 // Screen
 float aspect = u_ScreenSize.x / u_ScreenSize.y;
@@ -79,14 +87,17 @@ uniform uint u_SSBOSpheresCount;
 HitInfo CheckSphereCollision(Sphere sphere, Ray ray)
 {
     HitInfo info;
+    info.t = -1.0;
 
-    const vec3 oc = sphere.center - ray.origin;
-    const float a = dot(ray.direction, ray.direction); // a way to calculate squared length
-    const float h = dot(ray.direction, oc);
-    const float c = dot(oc, oc) - sphere.radius * sphere.radius;
-    const float disc = h * h - a * c;
+    vec3 oc = sphere.center - ray.origin;
+    float a = 1; // because rays are always normalized
+    float h = dot(ray.direction, oc);
+    float c = dot(oc, oc) - sphere.radius * sphere.radius;
+    float disc = h * h - a * c;
 
-    info.t = disc < 0 ? -1.0 : ((h - sqrt(disc)) / a);
+    if (disc < 0) return info;
+
+    info.t = ((h - sqrt(disc)) / a);
     info.hitPoint = GetPointOnRay(ray, info.t);
     info.normal = normalize(info.hitPoint - sphere.center);
     info.material = sphere.material;
@@ -104,7 +115,6 @@ HitInfo CalculateRaySpheresCollision(Ray ray)
         HitInfo hit = CheckSphereCollision(sphere, ray);
 
         bool didHit = hit.t > -1.0;
-
         if (didHit && hit.t < closestHit.t)
         {
             closestHit = hit;
@@ -122,15 +132,18 @@ vec3 Trace(Ray ray, inout uint rngState)
     for (uint i = 0; i < u_MaxReflectionsCount; i++)
     {
         HitInfo hitInfo = CalculateRaySpheresCollision(ray);
+
+        if (hitInfo.t == POSITIVE_INF) return light;
+
         if (hitInfo.t > -1.0)
         {
             ray.origin = hitInfo.hitPoint;
-            ray.direction = -RandomHemisphereDirection(hitInfo.normal, rngState); // TODO: Figure out why it needs the minus to work
+            ray.direction = normalize(hitInfo.normal + RandomDirection(rngState));
 
             Material material = hitInfo.material;
-            vec3 emittedLight = vec3(material.emission.xyz * material.emission.w);
+            vec3 emittedLight = vec3(material.emission.xyz) * (material.emission.w * float(u_RaysPerPixel));
             light += emittedLight * rayColor;
-            rayColor *= vec3(material.color);
+            rayColor *= material.color.xyz;
         }
         else
         {
@@ -146,7 +159,8 @@ void main()
     ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
     vec2 fragCoord = vec2(texelCoord).xy / u_ScreenSize.xy;
     vec2 uv = fragCoord * 2.0 - 1;
-    uint rngState = texelCoord.x * texelCoord.y;
+//    uint rngState = GenerateRNGState(texelCoord, u_FrameIndex, u_RandomSeed);
+    uint rngState = (texelCoord.x * texelCoord.y) + u_FrameIndex * 67829345;
 
     Ray ray = CalcRay(uv);
 
@@ -158,6 +172,8 @@ void main()
     }
 
     color /= u_RaysPerPixel;
+
+    color = sqrt(color / float(u_RaysPerPixel));
 
     WritePixelColor(texelCoord, color);
 }

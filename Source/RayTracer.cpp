@@ -1,6 +1,7 @@
 #include "RayTracer.hpp"
 #include "Window.hpp"
 #include "ShaderSourceProcessing.h"
+#include "Random.hpp"
 #include "glad.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -33,9 +34,10 @@ RayTracer::~RayTracer()
 
 void RayTracer::Update()
 {
-    const double time = m_Stopwatch.GetElapsed().AsSeconds();
+    const auto time = m_Stopwatch.GetElapsed().AsSeconds();
     m_DeltaTime = time - m_OldTime;
     m_OldTime = time;
+    m_FrameIndex++;
 
     DrawCompute();
     DrawScreenQuad();
@@ -210,9 +212,10 @@ void RayTracer::DrawCompute()
     m_RayTracerShader->Bind();
 
     m_RayTracerShader->SetUniformVec2("u_ScreenSize", glm::vec2(m_Window.GetWidth(), m_Window.GetHeight()));
-//    m_RayTracerShader->SetUniform1f("u_Time", m_Stopwatch.GetElapsed().AsSecondsF());
     m_RayTracerShader->SetUniform1i("u_MaxReflectionsCount", MaxReflectionsCount);
     m_RayTracerShader->SetUniform1i("u_RaysPerPixel", RaysPerPixel);
+    m_RayTracerShader->SetUniform1i("u_FrameIndex", m_FrameIndex);
+//    m_RayTracerShader->SetUniform1i("u_RandomSeed", GenerateRandomUint64(0, 0xFFFFFFFF));
     m_RayTracerShader->SetUniform1i("u_SSBOSpheresCount", m_Spheres.size());
 
     m_RayTracerShader->Dispatch(m_Window.GetWidth() / 8, m_Window.GetHeight() / 8, 1);
