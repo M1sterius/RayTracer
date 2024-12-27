@@ -217,13 +217,20 @@ void RayTracer::DrawCompute()
     m_RayTracerShader->SetUniform1i("u_MaxReflectionsCount", MaxReflectionsCount);
     m_RayTracerShader->SetUniform1i("u_RaysPerPixel", RaysPerPixel);
     m_RayTracerShader->SetUniform1i("u_FrameIndex", m_FrameIndex);
-//    m_RayTracerShader->SetUniform1i("u_RandomSeed", GenerateRandomUint64(0, 0xFFFFFFFF));
+    m_RayTracerShader->SetUniform1i("u_RandomSeed", GenerateRandomUint64(0, 0xFFFFFFFF));
     m_RayTracerShader->SetUniform1i("u_SSBOSpheresCount", m_Spheres.size());
 
     m_RayTracerShader->SetUniformVec3("u_CameraPosition", m_CamPosition);
     m_RayTracerShader->SetUniformVec3("u_CameraForward", glm::vec4(camForward) * m_CamViewMatrix);
     m_RayTracerShader->SetUniformVec3("u_CameraUp", glm::vec4(camUp) * m_CamViewMatrix);
     m_RayTracerShader->SetUniformVec3("u_CameraRight", glm::vec4(camRight) * m_CamViewMatrix);
+
+    float aspect = m_Window.GetAspect();
+    float FOV_Y = FOV / aspect;
+    float tanFOV_Y = glm::tan(FOV_Y / 2);
+    glm::vec2 halfViewportSize = glm::vec2(tanFOV_Y * aspect, tanFOV_Y) * FocalLength;
+
+    m_RayTracerShader->SetUniformVec2("u_HalfViewportSize", halfViewportSize);
 
     m_RayTracerShader->Dispatch(m_Window.GetWidth() / 8, m_Window.GetHeight() / 8, 1);
     glMemoryBarrier(GL_ALL_BARRIER_BITS);

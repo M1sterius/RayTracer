@@ -18,38 +18,28 @@ uniform uint u_RandomSeed;
 
 void WritePixelColor(ivec2 coord, vec3 color)
 {
-    vec3 prevColor = imageLoad(u_OutputTexture, coord).xyz;
-
-    float blend = 0.01;
-    vec3 col = prevColor * (1 - blend) + color * blend;
+//    vec3 prevColor = imageLoad(u_OutputTexture, coord).xyz;
+//
+//    float blend = 0.01;
+//    vec3 col = prevColor * (1 - blend) + color * blend;
 
 //    vec3 col = prevColor + color;
 
-    imageStore(u_OutputTexture, coord, vec4(col, 1.0));
+    imageStore(u_OutputTexture, coord, vec4(color, 1.0));
 }
 
-// Screen
-float aspect = u_ScreenSize.x / u_ScreenSize.y;
-
-// Camera
-const float FOV = (5 * PI) / 12;
-const float FOVY = FOV / aspect;
-const float focalLength = 1.0;
-
+// Camera properties uniforms
 uniform vec3 u_CameraPosition;
 uniform vec3 u_CameraForward;
 uniform vec3 u_CameraUp;
 uniform vec3 u_CameraRight;
-
-// Viewport
-const float tanFOVY = tan(FOVY / 2);
-vec2 halfViewportSize = vec2(tanFOVY * aspect, tanFOVY) * focalLength;
+uniform vec2 u_HalfViewportSize;
 
 Ray CalcRay(vec2 uv)
 {
     Ray ray;
     ray.origin = u_CameraPosition;
-    const vec2 screenSpaceViewport = halfViewportSize * uv;
+    const vec2 screenSpaceViewport = u_HalfViewportSize * uv;
 
     ray.direction = normalize(u_CameraRight * screenSpaceViewport.x + u_CameraUp *
     screenSpaceViewport.y + u_CameraForward);
