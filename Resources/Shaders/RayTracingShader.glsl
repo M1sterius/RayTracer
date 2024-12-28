@@ -16,24 +16,22 @@ uniform uint u_RaysPerPixel;
 uniform uint u_FrameIndex;
 uniform uint u_RandomSeed;
 
-void WritePixelColor(ivec2 coord, vec3 color)
-{
-//    vec3 prevColor = imageLoad(u_OutputTexture, coord).xyz;
-//
-//    float blend = 0.01;
-//    vec3 col = prevColor * (1 - blend) + color * blend;
-
-//    vec3 col = prevColor + color;
-
-    imageStore(u_OutputTexture, coord, vec4(color, 1.0));
-}
-
 // Camera properties uniforms
 uniform vec3 u_CameraPosition;
 uniform vec3 u_CameraForward;
 uniform vec3 u_CameraUp;
 uniform vec3 u_CameraRight;
 uniform vec2 u_HalfViewportSize;
+
+void WritePixelColor(ivec2 coord, vec3 color)
+{
+    vec3 prevColor = imageLoad(u_OutputTexture, coord).xyz;
+
+    float blend = 0.01;
+    vec3 col = prevColor * (1 - blend) + color * blend;
+
+    imageStore(u_OutputTexture, coord, vec4(col, 1.0));
+}
 
 Ray CalcRay(vec2 uv)
 {
@@ -152,7 +150,6 @@ void main()
     vec2 fragCoord = vec2(texelCoord).xy / u_ScreenSize.xy;
     vec2 uv = fragCoord * 2.0 - 1;
     uint rngState = GenerateRNGState(texelCoord, u_FrameIndex, u_RandomSeed);
-//    uint rngState = (texelCoord.x * texelCoord.y) + u_FrameIndex * 67829345;
 
     Ray ray = CalcRay(uv);
 
@@ -164,8 +161,7 @@ void main()
     }
 
     color /= u_RaysPerPixel;
-
-    color = sqrt(color / float(u_RaysPerPixel));
+    color = sqrt(color / float(u_RaysPerPixel)); // gamma correction
 
     WritePixelColor(texelCoord, color);
 }

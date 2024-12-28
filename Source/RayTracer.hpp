@@ -22,7 +22,7 @@ public:
 
     uint32_t MaxReflectionsCount = 10;
     uint32_t RaysPerPixel = 100;
-    float FOV = 3.14159 / 3;
+    float FOV = 3.14159 / 2;
     float FocalLength = 1.0;
 
     void AddSphere(Sphere sphere);

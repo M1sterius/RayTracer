@@ -17,7 +17,7 @@ int32_t main(int32_t argc, char* argv[])
     auto s2 = Sphere{glm::vec3(0.38, -0.05, -0.85), 0.27f, Material{glm::vec4(1.0, 0.0, 0.0, 0.0), glm::vec4(0.0),  0.0}};
     auto s3 = Sphere{glm::vec3(-0.05, -0.05, -0.71), 0.15f, Material{glm::vec4(0.0, 1.0, 0.0, 0.0), glm::vec4(0.0),  0.0}};
     auto s4 = Sphere{glm::vec3(-0.3, -0.05, -0.57), 0.11f, Material{glm::vec4(0.0, 0.0, 1.0, 0.0), glm::vec4(0.0),  0.0}};
-    auto s5 = Sphere{glm::vec3(-1.4, 0.5, 0.0), 0.9f, Material{glm::vec4(0.0), glm::vec4(1.0, 1.0, 1.0, 1.0),  0.0}};
+    auto s5 = Sphere{glm::vec3(-1.4, 0.5, 0.0), 0.9f, Material{glm::vec4(0.0), glm::vec4(1.0, 1.0, 1.0, 3.0),  0.0}};
 
     rayTracer.AddSphere(s1);
     rayTracer.AddSphere(s2);

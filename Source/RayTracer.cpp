@@ -225,9 +225,9 @@ void RayTracer::DrawCompute()
     m_RayTracerShader->SetUniformVec3("u_CameraUp", glm::vec4(camUp) * m_CamViewMatrix);
     m_RayTracerShader->SetUniformVec3("u_CameraRight", glm::vec4(camRight) * m_CamViewMatrix);
 
-    float aspect = m_Window.GetAspect();
-    float FOV_Y = FOV / aspect;
-    float tanFOV_Y = glm::tan(FOV_Y / 2);
+    auto aspect = m_Window.GetAspect();
+    auto FOV_Y = FOV / aspect;
+    auto tanFOV_Y = glm::tan(FOV_Y / 2);
     glm::vec2 halfViewportSize = glm::vec2(tanFOV_Y * aspect, tanFOV_Y) * FocalLength;
 
     m_RayTracerShader->SetUniformVec2("u_HalfViewportSize", halfViewportSize);
@@ -253,7 +253,7 @@ void RayTracer::DrawDebug()
     ImGui::SliderInt("Rays per pixel", &IntRaysPerPixel, 1, 100);
     RaysPerPixel = IntRaysPerPixel;
 
-    ImGui::SliderFloat("Cam FOV", &FOV, 0, glm::pi<float>() / 2);
+    ImGui::SliderFloat("Cam FOV", &FOV, glm::pi<float>() / 12, glm::pi<float>() / 2);
     ImGui::SliderFloat("Focal length", &FocalLength, 0.001, 10);
 
     const auto camPosTxt = "Camera Position: " + glm::to_string(m_CamPosition);
