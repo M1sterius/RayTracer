@@ -1,3 +1,4 @@
+#include "Mesh.hpp"
 #include "Window.hpp"
 #include "RayTracer.hpp"
 #include "ShaderStructs.hpp"
@@ -24,6 +25,8 @@ int32_t main(int32_t argc, char* argv[])
     rayTracer.AddSphere(s3);
     rayTracer.AddSphere(s4);
     rayTracer.AddSphere(s5);
+
+    auto mesh = Mesh("Resources/Meshes/Cube.obj", {});
 
     auto sw = Stopwatch();
     while (!window.ShouldClose())
