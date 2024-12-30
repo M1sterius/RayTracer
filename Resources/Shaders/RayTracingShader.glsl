@@ -60,6 +60,21 @@ struct Sphere
     Material material;
 };
 
+struct Triangle
+{
+    // vec4 used to comply with std430 alignment , w component does nothing
+    vec4 v0;
+    vec4 v1;
+    vec4 v4;
+};
+
+struct Mesh
+{
+    uint TrianglesStartIndex; // Index to the first triangle of the mesh in the triangles buffer
+    uint TrianglesCount; // The amount of triangles this mesh consists of in the triangles buffer
+    Material material;
+};
+
 struct HitInfo
 {
     float t;
