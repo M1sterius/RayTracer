@@ -8,7 +8,7 @@
 class Mesh
 {
 public:
-    Mesh(const std::filesystem::path& objPath, const Material_GLSL& material);
+    Mesh(const std::filesystem::path& objPath, const Material_GLSL& material, const glm::vec3& pos);
     ~Mesh();
 
     Material_GLSL Material;

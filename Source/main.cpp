@@ -26,7 +26,7 @@ int32_t main(int32_t argc, char* argv[])
     rayTracer.AddSphere(s4);
     rayTracer.AddSphere(s5);
 
-    auto mesh = Mesh("Resources/Meshes/Cube.obj", {});
+    auto mesh = Mesh("Resources/Meshes/Cube.obj", {}, glm::vec3(0.0));
 
     auto sw = Stopwatch();
     while (!window.ShouldClose())
@@ -40,7 +40,4 @@ int32_t main(int32_t argc, char* argv[])
         LimitFPS(sw.Stop().AsSeconds(), 240);
     }
 }
-
-
-
 

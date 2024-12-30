@@ -46,19 +46,12 @@ Ray CalcRay(vec2 uv)
     return ray;
 }
 
-struct Sphere
-{
-    vec3 center;
-    float radius;
-    Material material;
-};
-
 struct Triangle
 {
     // vec4 used to comply with std430 alignment , w component does nothing
     vec4 v0;
     vec4 v1;
-    vec4 v4;
+    vec4 v2;
 };
 
 struct Mesh
@@ -73,49 +66,75 @@ struct HitInfo
     float t;
     vec3 hitPoint;
     vec3 normal;
-    Material material;
+    uint HitMeshID;
 };
 
-layout(std430, binding = 1) buffer s_SpheresBuffer
+layout(std430, binding = 1) buffer ssbo_MeshBuffer
 {
-    Sphere SSBO_spheres[];
+    Mesh ssbo_Meshes[MESHES_COUNT_LIMIT];
+    Triangle ssbo_Triangles[];
 };
-uniform uint u_SSBOSpheresCount;
+uniform uint u_MeshesCount;
 
-HitInfo CheckSphereCollision(Sphere sphere, Ray ray)
+HitInfo RayTriangleCollision(Ray ray, Triangle triangle)
 {
-    HitInfo info;
-    info.t = -1.0;
+    const float epsilon = 0.000001;
+    HitInfo hit = HitInfo(-1.0, vec3(0.0), vec3(0.0), 0);
 
-    vec3 oc = sphere.center - ray.origin;
-    float a = 1; // because rays are always normalized
-    float h = dot(ray.direction, oc);
-    float c = dot(oc, oc) - sphere.radius * sphere.radius;
-    float disc = h * h - a * c;
+    vec3 edge1 = (triangle.v1 - triangle.v0).xyz;
+    vec3 edge2 = (triangle.v2 - triangle.v0).xyz;
+    vec3 ray_cross_e2 = cross(ray.direction, edge2);
+    float det = dot(edge1, ray_cross_e2);
 
-    if (disc < 0) return info;
+    if (det > -epsilon && det < epsilon)
+        return hit;
 
-    info.t = ((h - sqrt(disc)) / a);
-    info.hitPoint = GetPointOnRay(ray, info.t);
-    info.normal = normalize(info.hitPoint - sphere.center);
-    info.material = sphere.material;
+    float inv_det = 1.0f / det;
+    vec3 s = ray.origin - triangle.v0.xyz;
+    float u = inv_det * dot(s, ray_cross_e2);
 
-    return info;
+    if ((u < 0 && abs(u) > epsilon) || (u > 1 && abs(u-1) > epsilon))
+        return hit;
+
+    vec3 s_cross_e1 = cross(s, edge1);
+    float v = inv_det * dot(ray.direction, s_cross_e1);
+
+    if ((v < 0 && abs(v) > epsilon) || (u + v > 1 && abs(u + v - 1) > epsilon))
+        return hit;
+
+    float t = inv_det * dot(edge2, s_cross_e1);
+
+    if (t > epsilon) {
+        hit.t = t;
+        hit.hitPoint = ray_origin + ray_vector * t;
+        hit.normal = normalize(cross(edge1, edge2));
+        return hit;
+    }
+
+    return hit;
 }
 
-HitInfo CalculateRaySpheresCollision(Ray ray)
+HitInfo CalculateRayCollision(Ray ray)
 {
-    HitInfo closestHit = HitInfo(POSITIVE_INF, vec3(0.0), vec3(0.0), Material(vec4(0.0), vec4(0.0), 0.0));
+    HitInfo closestHit = HitInfo(POSITIVE_INF, vec3(0.0), vec3(0.0), 0);
 
-    for (uint i = 0; i < u_SSBOSpheresCount; i++)
+    // Go through all the meshes
+    for (uint i = 0; i < u_MeshesCount; i++)
     {
-        Sphere sphere = SSBO_spheres[i];
-        HitInfo hit = CheckSphereCollision(sphere, ray);
+        Mesh mesh = ssbo_Meshes[i];
+        uint startIndex = mesh.TrianglesStartIndex;
 
-        bool didHit = hit.t > -1.0;
-        if (didHit && hit.t < closestHit.t)
+        // Go through all triangles current mesh consists of
+        for (uint j = startIndex; j < startIndex + mesh.TrianglesCount; i++)
         {
-            closestHit = hit;
+            Triangle triangle = ssbo_Triangles[j];
+            HitInfo hit = RayTriangleCollision(ray, triangle);
+
+            if (hit.t < closestHit.t)
+            {
+                closestHit = hit;
+                closestHit.HitMeshID = i;
+            }
         }
     }
 
@@ -129,7 +148,7 @@ vec3 Trace(Ray ray, inout uint rngState)
 
     for (uint i = 0; i < u_MaxReflectionsCount; i++)
     {
-        HitInfo hitInfo = CalculateRaySpheresCollision(ray);
+        HitInfo hitInfo = CalculateRayCollision(ray);
 
         if (hitInfo.t == POSITIVE_INF) return light;
 
@@ -138,7 +157,7 @@ vec3 Trace(Ray ray, inout uint rngState)
             ray.origin = hitInfo.hitPoint;
             ray.direction = normalize(hitInfo.normal + RandomDirection(rngState));
 
-            Material material = hitInfo.material;
+            Material material = ssbo_Meshes[hitInfo.HitMeshID].material;
             vec3 emittedLight = vec3(material.emission.xyz) * (material.emission.w * float(u_RaysPerPixel));
             light += emittedLight * rayColor;
             rayColor *= material.color.xyz;

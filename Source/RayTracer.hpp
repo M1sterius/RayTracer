@@ -61,4 +61,6 @@ private:
     static constexpr auto camForward = glm::vec4(0.0, 0.0, -1.0, 0.0);
     static constexpr auto camUp = glm::vec4(0.0, 1.0, 0.0, 0.0);
     static constexpr auto camRight = glm::vec4(1.0, 0.0, 0.0, 0.0);
+
+    static constexpr uint32_t MESHES_COUNT_LIMIT = 512;
 };
