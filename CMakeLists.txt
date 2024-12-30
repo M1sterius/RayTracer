@@ -24,6 +24,8 @@ add_executable(RayTracer
     Source/Utilities/Stopwatch.hpp
     Source/GL/GLSLPreprocessor.h
     Source/GL/SSBO.cpp
+    Source/Mesh.cpp
+        Source/Mesh.hpp
 )
 
 target_include_directories(RayTracer PRIVATE
@@ -32,6 +34,7 @@ target_include_directories(RayTracer PRIVATE
     ${DEPENDENCIES_DIR}/glad/include/glad
     ${DEPENDENCIES_DIR}/glad/include
     ${DEPENDENCIES_DIR}/imgui
+    ${DEPENDENCIES_DIR}/obj_loader
 
     Source
     Source/Utilities

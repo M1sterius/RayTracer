@@ -46,10 +46,10 @@ void RayTracer::Update()
     DrawDebug();
 }
 
-void RayTracer::AddSphere(Sphere sphere)
+void RayTracer::AddSphere(Sphere_GLSL sphere)
 {
     m_Spheres.push_back(sphere);
-    m_SSBO->UpdateData(m_Spheres.data(), m_Spheres.size() * sizeof(Sphere), 0);
+    m_SSBO->UpdateData(m_Spheres.data(), m_Spheres.size() * sizeof(Sphere_GLSL), 0);
 }
 
 void RayTracer::InitScreenQuad()

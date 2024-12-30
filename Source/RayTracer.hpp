@@ -25,7 +25,7 @@ public:
     float FOV = 3.14159 / 2;
     float FocalLength = 1.0;
 
-    void AddSphere(Sphere sphere);
+    void AddSphere(Sphere_GLSL sphere);
     void SetCamPosition(const glm::vec3& pos);
     void SetCamRotation(const glm::quat& rot);
 private:
@@ -42,7 +42,7 @@ private:
     unsigned int m_IndexBufferHandle;
     unsigned int m_ScreenShaderHandle;
 
-    std::vector<Sphere> m_Spheres;
+    std::vector<Sphere_GLSL> m_Spheres;
     std::unique_ptr<SSBO> m_SSBO;
     bool m_ShouldUpdateSSBO = true;
 
