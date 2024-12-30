@@ -6,6 +6,7 @@
 #include "Ray.glsl"
 #include "Random.glsl"
 #include "Constants.glsl"
+#include "Material.glsl"
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D u_OutputTexture;
@@ -44,14 +45,6 @@ Ray CalcRay(vec2 uv)
 
     return ray;
 }
-
-// vec4s are used for alignment reasons only
-struct Material
-{
-    vec4 color;
-    vec4 emission; // xyz - emission color, w - emission strength
-    float smoothness;
-};
 
 struct Sphere
 {
