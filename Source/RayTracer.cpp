@@ -46,10 +46,44 @@ void RayTracer::Update()
     DrawDebug();
 }
 
-void RayTracer::AddSphere(Sphere_GLSL sphere)
+void RayTracer::AddMesh(const Mesh& mesh)
 {
-    m_Spheres.push_back(sphere);
-    m_SSBO->UpdateData(m_Spheres.data(), m_Spheres.size() * sizeof(Sphere_GLSL), 0);
+    if (m_Meshes.size() >= MESH_COUNT_LIMIT)
+    {
+        printf("Cannot add more meshes to this scene. MESHES_COUNT_LIMIT exceeded.\n");
+        return;
+    }
+
+    m_Meshes.push_back(mesh);
+
+    // first MESH_COUNT_LIMIT * sizeof(Mesh_GLSL) byte - a fixed size array of Mesh structs
+    // everything after it - a dynamic array of triangles
+
+    std::vector<Triangle_GLSL> triangles;
+    std::vector<Mesh_GLSL> meshes;
+    for (const auto& curMesh : m_Meshes)
+    {
+        const auto& vc = curMesh.GetTriangles();
+        const auto startIndex = (uint32_t)triangles.size();
+        triangles.insert(triangles.end(), vc.begin(), vc.end());
+
+        meshes.push_back(Mesh_GLSL{startIndex, (uint32_t)vc.size(), mesh.Material});
+    }
+
+    constexpr size_t meshArraySize = MESH_COUNT_LIMIT * sizeof(Mesh_GLSL);
+    const size_t trianglesBufferSize = triangles.size() * sizeof(Triangle_GLSL);
+    const size_t fullSSBOSize = meshArraySize + trianglesBufferSize;
+
+    auto ssboData = new uint8_t[fullSSBOSize];
+
+    const size_t meshesCopySize = meshes.size() * sizeof(Mesh_GLSL);
+
+    memcpy(ssboData, meshes.data(), meshesCopySize);
+    memcpy(ssboData + meshArraySize, triangles.data(), trianglesBufferSize);
+
+    m_SSBO->UpdateData(ssboData, fullSSBOSize, 0);
+
+    delete[] ssboData;
 }
 
 void RayTracer::InitScreenQuad()
@@ -218,7 +252,7 @@ void RayTracer::DrawCompute()
     m_RayTracerShader->SetUniform1i("u_RaysPerPixel", RaysPerPixel);
     m_RayTracerShader->SetUniform1i("u_FrameIndex", m_FrameIndex);
     m_RayTracerShader->SetUniform1i("u_RandomSeed", GenerateRandomUint64(0, 0xFFFFFFFF));
-    m_RayTracerShader->SetUniform1i("u_SSBOSpheresCount", m_Spheres.size());
+    m_RayTracerShader->SetUniform1i("u_MeshesCount", m_Meshes.size());
 
     m_RayTracerShader->SetUniformVec3("u_CameraPosition", m_CamPosition);
     m_RayTracerShader->SetUniformVec3("u_CameraForward", glm::vec4(camForward) * m_CamViewMatrix);

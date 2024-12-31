@@ -26,12 +26,12 @@ uniform vec2 u_HalfViewportSize;
 
 void WritePixelColor(ivec2 coord, vec3 color)
 {
-    vec3 prevColor = imageLoad(u_OutputTexture, coord).xyz;
+//    vec3 prevColor = imageLoad(u_OutputTexture, coord).xyz;
+//
+//    float blend = 0.01;
+//    vec3 col = prevColor * (1 - blend) + color * blend;
 
-    float blend = 0.01;
-    vec3 col = prevColor * (1 - blend) + color * blend;
-
-    imageStore(u_OutputTexture, coord, vec4(col, 1.0));
+    imageStore(u_OutputTexture, coord, vec4(color, 1.0));
 }
 
 Ray CalcRay(vec2 uv)
@@ -71,7 +71,7 @@ struct HitInfo
 
 layout(std430, binding = 1) buffer ssbo_MeshBuffer
 {
-    Mesh ssbo_Meshes[MESHES_COUNT_LIMIT];
+    Mesh ssbo_Meshes[MESH_COUNT_LIMIT];
     Triangle ssbo_Triangles[];
 };
 uniform uint u_MeshesCount;
@@ -106,7 +106,7 @@ HitInfo RayTriangleCollision(Ray ray, Triangle triangle)
 
     if (t > epsilon) {
         hit.t = t;
-        hit.hitPoint = ray_origin + ray_vector * t;
+        hit.hitPoint = ray.origin + ray.direction * t;
         hit.normal = normalize(cross(edge1, edge2));
         return hit;
     }
@@ -125,12 +125,12 @@ HitInfo CalculateRayCollision(Ray ray)
         uint startIndex = mesh.TrianglesStartIndex;
 
         // Go through all triangles current mesh consists of
-        for (uint j = startIndex; j < startIndex + mesh.TrianglesCount; i++)
+        for (uint j = startIndex; j < startIndex + mesh.TrianglesCount; j++)
         {
             Triangle triangle = ssbo_Triangles[j];
             HitInfo hit = RayTriangleCollision(ray, triangle);
 
-            if (hit.t < closestHit.t)
+            if (hit.t > -1.0 && hit.t < closestHit.t)
             {
                 closestHit = hit;
                 closestHit.HitMeshID = i;

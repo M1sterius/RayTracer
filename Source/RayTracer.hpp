@@ -4,6 +4,7 @@
 #include "Stopwatch.hpp"
 #include "ShaderStructs.hpp"
 #include "SSBO.hpp"
+#include "Mesh.hpp"
 #include "glm.hpp"
 #include "gtx/quaternion.hpp"
 
@@ -21,11 +22,11 @@ public:
     void Update();
 
     uint32_t MaxReflectionsCount = 10;
-    uint32_t RaysPerPixel = 100;
+    uint32_t RaysPerPixel = 32;
     float FOV = 3.14159 / 2;
     float FocalLength = 1.0;
 
-    void AddSphere(Sphere_GLSL sphere);
+    void AddMesh(const Mesh& mesh);
     void SetCamPosition(const glm::vec3& pos);
     void SetCamRotation(const glm::quat& rot);
 private:
@@ -42,9 +43,8 @@ private:
     unsigned int m_IndexBufferHandle;
     unsigned int m_ScreenShaderHandle;
 
-    std::vector<Sphere_GLSL> m_Spheres;
+    std::vector<Mesh> m_Meshes;
     std::unique_ptr<SSBO> m_SSBO;
-    bool m_ShouldUpdateSSBO = true;
 
     Stopwatch m_Stopwatch;
     double m_OldTime;
@@ -62,5 +62,5 @@ private:
     static constexpr auto camUp = glm::vec4(0.0, 1.0, 0.0, 0.0);
     static constexpr auto camRight = glm::vec4(1.0, 0.0, 0.0, 0.0);
 
-    static constexpr uint32_t MESHES_COUNT_LIMIT = 512;
+    static constexpr uint32_t MESH_COUNT_LIMIT = 512;
 };
