@@ -26,12 +26,12 @@ uniform vec2 u_HalfViewportSize;
 
 void WritePixelColor(ivec2 coord, vec3 color)
 {
-//    vec3 prevColor = imageLoad(u_OutputTexture, coord).xyz;
-//
-//    float blend = 0.01;
-//    vec3 col = prevColor * (1 - blend) + color * blend;
+    vec3 prevColor = imageLoad(u_OutputTexture, coord).xyz;
 
-    imageStore(u_OutputTexture, coord, vec4(color, 1.0));
+    float blend = 0.01;
+    vec3 col = prevColor * (1 - blend) + color * blend;
+
+    imageStore(u_OutputTexture, coord, vec4(col, 1.0));
 }
 
 Ray CalcRay(vec2 uv)

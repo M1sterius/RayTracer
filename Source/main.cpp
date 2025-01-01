@@ -32,7 +32,7 @@ int32_t main(int32_t argc, char* argv[])
     );
 
     auto mesh = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(1.0),
-glm::vec4(1.0, 1.0, 1.0, 1.0), 0.0}, transform);
+glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform);
 
     auto transform1 = CreateTransform(
             glm::vec3(-1.0, 0, 0.0),
@@ -40,8 +40,8 @@ glm::vec4(1.0, 1.0, 1.0, 1.0), 0.0}, transform);
             glm::vec3(1.0, 1.0, 1.0)
     );
 
-    auto mesh1 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(0.0, 1.0, 0.0, 1.0),
-       glm::vec4(0.0, 1.0, 0.0, 1.0), 0.0}, transform1);
+    auto mesh1 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(0.0, 0.0, 0.0, 1.0),
+       glm::vec4(1.0, 1.0, 1.0, 1.0), 0.0}, transform1);
 
     rayTracer.AddMesh(mesh);
     rayTracer.AddMesh(mesh1);
@@ -60,6 +60,7 @@ glm::vec4(1.0, 1.0, 1.0, 1.0), 0.0}, transform);
         LimitFPS(sw.Stop().AsSeconds(), 240);
     }
 }
+
 
 
 

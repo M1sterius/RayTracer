@@ -67,7 +67,7 @@ void RayTracer::AddMesh(const Mesh& mesh)
         const auto startIndex = (uint32_t)triangles.size();
         triangles.insert(triangles.end(), vc.begin(), vc.end());
 
-        meshes.push_back(Mesh_GLSL{startIndex, (uint32_t)vc.size(), mesh.Material});
+        meshes.push_back(Mesh_GLSL{startIndex, (uint32_t)vc.size(), curMesh.Material});
     }
 
     constexpr size_t meshArraySize = MESH_COUNT_LIMIT * sizeof(Mesh_GLSL);
