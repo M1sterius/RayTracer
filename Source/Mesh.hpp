@@ -11,6 +11,9 @@ public:
     Mesh(const std::filesystem::path& objPath, const Material_GLSL& material, const glm::mat4& transform);
     ~Mesh();
 
+    Mesh(const Mesh&) = default;
+    Mesh& operator =(const Mesh&) = default;
+
     Material_GLSL Material;
 
     const std::vector<Triangle_GLSL>& GetTriangles() const { return m_Triangles; }

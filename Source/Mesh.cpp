@@ -19,33 +19,20 @@ Mesh::Mesh(const std::filesystem::path& objPath, const Material_GLSL& material, 
         auto v1 = loader.LoadedVertices[loader.LoadedIndices[i + 1]].Position;
         auto v2 = loader.LoadedVertices[loader.LoadedIndices[i + 2]].Position;
 
-//        // Terrible temporary implementation of mesh transformation
-//        m_Triangles.push_back({
-//            glm::vec4(v0.X, v0.Y, v0.Z, 1.0) * transform,
-//            glm::vec4(v1.X, v1.Y, v1.Z, 1.0) * transform,
-//            glm::vec4(v2.X, v2.Y, v2.Z, 1.0) * transform
-//        });
-
-        glm::vec4 v0Transformed = transform * glm::vec4(v0.X, v0.Y, v0.Z, 1.0);
-        glm::vec4 v1Transformed = transform * glm::vec4(v1.X, v1.Y, v1.Z, 1.0);
-        glm::vec4 v2Transformed = transform * glm::vec4(v2.X, v2.Y, v2.Z, 1.0);
-
-// If w is not 1.0, normalize to ensure correctness
-        v0Transformed /= v0Transformed.w;
-        v1Transformed /= v1Transformed.w;
-        v2Transformed /= v2Transformed.w;
-
+        // Terrible temporary implementation of mesh transformation
         m_Triangles.push_back({
-              glm::vec4(v0Transformed.x, v0Transformed.y, v0Transformed.z, 1.0), // Convert back to vec3 if needed
-              glm::vec4(v1Transformed.x, v1Transformed.y, v1Transformed.z, 1.0),
-              glm::vec4(v2Transformed.x, v2Transformed.y, v2Transformed.z, 1.0)
+          glm::vec4(v0.X, v0.Y, v0.Z, 1.0) * transform,
+          glm::vec4(v1.X, v1.Y, v1.Z, 1.0) * transform,
+          glm::vec4(v2.X, v2.Y, v2.Z, 1.0) * transform
         });
     }
 
-//    for (const auto& tri : m_Triangles)
-//    {
-//        std::cout << glm::to_string(tri.v0) << glm::to_string(tri.v1) << glm::to_string(tri.v2) << '\n';
-//    }
+    for (auto& tri : m_Triangles)
+    {
+        tri.v0 = tri.v0 * transform;
+        tri.v1 = tri.v1 * transform;
+        tri.v2 = tri.v2 * transform;
+    }
 }
 
 Mesh::~Mesh() = default;
