@@ -15,6 +15,7 @@ public:
     Mesh& operator =(const Mesh&) = default;
 
     Material_GLSL Material;
+    AABB_GLSL AABB;
 
     const std::vector<Triangle_GLSL>& GetTriangles() const { return m_Triangles; }
 private:

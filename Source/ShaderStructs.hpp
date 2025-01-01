@@ -25,9 +25,22 @@ struct alignas(16) Triangle_GLSL
     glm::vec4 v2;
 };
 
+struct alignas(16) AABB_GLSL
+{
+    glm::vec4 min;
+    glm::vec4 max;
+
+    inline void GrowToInclude(const glm::vec4& point)
+    {
+        min = glm::min(min, point);
+        max = glm::max(max, point);
+    }
+};
+
 struct alignas(16) Mesh_GLSL
 {
     uint32_t TrianglesStartIndex; // Index to the first triangle of the mesh in the triangles buffer
     uint32_t TrianglesCount; // The amount of triangles this mesh consists of in the triangles buffer
+    AABB_GLSL aabb;
     Material_GLSL material;
 };

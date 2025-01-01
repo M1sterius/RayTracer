@@ -54,10 +54,17 @@ struct Triangle
     vec4 v2;
 };
 
+struct AABB
+{
+    vec4 min;
+    vec4 max;
+};
+
 struct Mesh
 {
     uint TrianglesStartIndex; // Index to the first triangle of the mesh in the triangles buffer
     uint TrianglesCount; // The amount of triangles this mesh consists of in the triangles buffer
+    AABB aabb;
     Material material;
 };
 
@@ -78,7 +85,7 @@ uniform uint u_MeshesCount;
 
 HitInfo RayTriangleCollision(Ray ray, Triangle triangle)
 {
-    const float epsilon = 0.000001;
+    const float epsilon = 0.0001;
     HitInfo hit = HitInfo(-1.0, vec3(0.0), vec3(0.0), 0);
 
     vec3 edge1 = (triangle.v1 - triangle.v0).xyz;
@@ -104,7 +111,8 @@ HitInfo RayTriangleCollision(Ray ray, Triangle triangle)
 
     float t = inv_det * dot(edge2, s_cross_e1);
 
-    if (t > epsilon) {
+    if (t > epsilon)
+    {
         hit.t = t;
         hit.hitPoint = ray.origin + ray.direction * t;
         hit.normal = normalize(cross(edge1, edge2));
@@ -112,6 +120,22 @@ HitInfo RayTriangleCollision(Ray ray, Triangle triangle)
     }
 
     return hit;
+}
+
+bool RayAABBCollision(Ray ray, AABB box)
+{
+    vec3 invDir = 1.0 / ray.direction;
+
+    vec3 t0 = (box.min.xyz - ray.origin) * invDir;
+    vec3 t1 = (box.max.xyz - ray.origin) * invDir;
+
+    vec3 tmin = min(t0, t1);
+    vec3 tmax = max(t0, t1);
+
+    float largest_tmin = max(max(tmin.x, tmin.y), tmin.z);
+    float smallest_tmax = min(min(tmax.x, tmax.y), tmax.z);
+
+    return largest_tmin <= smallest_tmax && smallest_tmax >= 0.0;
 }
 
 HitInfo CalculateRayCollision(Ray ray)
@@ -123,6 +147,8 @@ HitInfo CalculateRayCollision(Ray ray)
     {
         Mesh mesh = ssbo_Meshes[i];
         uint startIndex = mesh.TrianglesStartIndex;
+
+        if (!RayAABBCollision(ray, mesh.aabb)) continue;
 
         // Go through all triangles current mesh consists of
         for (uint j = startIndex; j < startIndex + mesh.TrianglesCount; j++)

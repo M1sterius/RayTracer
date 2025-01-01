@@ -22,7 +22,7 @@ public:
     void Update();
 
     uint32_t MaxReflectionsCount = 10;
-    uint32_t RaysPerPixel = 32;
+    uint32_t RaysPerPixel = 64;
     float FOV = 3.14159 / 2;
     float FocalLength = 1.0;
 

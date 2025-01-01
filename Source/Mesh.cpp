@@ -3,7 +3,7 @@
 #include "gtx/string_cast.hpp"
 
 Mesh::Mesh(const std::filesystem::path& objPath, const Material_GLSL& material, const glm::mat4& transform)
-    : m_Path(objPath), Material(material)
+    : m_Path(objPath), Material(material), AABB({})
 {
     auto loader = objl::Loader();
 
@@ -32,6 +32,10 @@ Mesh::Mesh(const std::filesystem::path& objPath, const Material_GLSL& material, 
         tri.v0 = tri.v0 * transform;
         tri.v1 = tri.v1 * transform;
         tri.v2 = tri.v2 * transform;
+
+        AABB.GrowToInclude(tri.v0);
+        AABB.GrowToInclude(tri.v1);
+        AABB.GrowToInclude(tri.v2);
     }
 }
 

@@ -63,12 +63,28 @@ void RayTracer::AddMesh(const Mesh& mesh)
     std::vector<Mesh_GLSL> meshes;
     for (const auto& curMesh : m_Meshes)
     {
-        const auto& vc = curMesh.GetTriangles();
-        const auto startIndex = (uint32_t)triangles.size();
-        triangles.insert(triangles.end(), vc.begin(), vc.end());
+        /*
+         * Go through all meshes and add all triangles into a single array
+         *
+         * Set TrianglesStartIndex and TrianglesCount for each mesh to mark which continuous block
+         * of triangles corresponds to each mesh
+         */
 
-        meshes.push_back(Mesh_GLSL{startIndex, (uint32_t)vc.size(), curMesh.Material});
+        const auto& curMeshTriangles = curMesh.GetTriangles();
+        const auto startIndex = (uint32_t)triangles.size();
+        triangles.insert(triangles.end(), curMeshTriangles.begin(), curMeshTriangles.end());
+
+        meshes.push_back(Mesh_GLSL{startIndex, (uint32_t)curMeshTriangles.size(), curMesh.AABB, curMesh.Material});
     }
+
+    /*
+     * Form a single array for both triangles and meshes
+     *
+     * First section of the array has a fixed size and stores number meshes up to MESH_COUNT_LIMIT
+     *
+     * Second section of the array has a dynamic size to always be able to store
+     * all triangles from meshes
+     */
 
     constexpr size_t meshArraySize = MESH_COUNT_LIMIT * sizeof(Mesh_GLSL);
     const size_t trianglesBufferSize = triangles.size() * sizeof(Triangle_GLSL);

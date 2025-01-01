@@ -26,27 +26,34 @@ int32_t main(int32_t argc, char* argv[])
     auto rayTracer = RayTracer(window);
 
     auto transform = CreateTransform(
-        glm::vec3(1.0, 0.0, 0.0),
-        glm::vec3(0.0, 0.0, 0.0),
-        glm::vec3(1.0, 1.0, 1.0)
-    );
-
-    auto mesh = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(1.0),
-glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform);
+            glm::vec3(0.0, 1.0, 0.0),
+            glm::vec3(0, 0, 0),
+            glm::vec3(1.0, 0.5, 1.0)
+    ); // LIGHT
+    auto mesh = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(0.0, 0.0, 0.0, 1.0),
+    glm::vec4(1.0, 1.0, 1.0, 1.0), 0.0}, transform);
 
     auto transform1 = CreateTransform(
-            glm::vec3(-1.0, 0, 0.0),
-            glm::vec3(3.14159 / 3, 3.14159 / 3, 3.14159 / 3),
-            glm::vec3(1.0, 1.0, 1.0)
+        glm::vec3(0.0, -2.0, 0.0),
+        glm::vec3(0, 0, 0.0),
+        glm::vec3(2.0, 0.2, 2.0)
     );
+    auto mesh1 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(1.0),
+glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform1);
 
-    auto mesh1 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(0.0, 0.0, 0.0, 1.0),
-       glm::vec4(1.0, 1.0, 1.0, 1.0), 0.0}, transform1);
+    auto transform2 = CreateTransform(
+            glm::vec3(0.0, 0.5, -1.9),
+            glm::vec3(0, 0, 0.0),
+            glm::vec3(2.0, 2.0, 0.2)
+    );
+    auto mesh2 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(1.0, 0.0, 0.0, 1.0),
+       glm::vec4(0.0), 0.0}, transform2);
 
     rayTracer.AddMesh(mesh);
     rayTracer.AddMesh(mesh1);
+    rayTracer.AddMesh(mesh2);
 
-    rayTracer.SetCamPosition(glm::vec3(0.0, 0.0, 5.0));
+    rayTracer.SetCamPosition(glm::vec3(0.0, 0.0, 7.0));
 
     auto sw = Stopwatch();
     while (!window.ShouldClose())
@@ -60,7 +67,6 @@ glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform);
         LimitFPS(sw.Stop().AsSeconds(), 240);
     }
 }
-
 
 
 
