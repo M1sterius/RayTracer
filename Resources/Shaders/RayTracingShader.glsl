@@ -172,21 +172,36 @@ vec3 Trace(Ray ray, inout uint rngState)
     vec3 light = vec3(0.0);
     vec3 rayColor = vec3(1.0);
 
-    for (uint i = 0; i < u_MaxReflectionsCount; i++)
+    for (uint i = 0; i < u_MaxReflectionsCount; ++i)
     {
         HitInfo hitInfo = CalculateRayCollision(ray);
 
-        if (hitInfo.t == POSITIVE_INF) return light;
+        if (hitInfo.t == POSITIVE_INF) break;
 
         if (hitInfo.t > -1.0)
         {
-            ray.origin = hitInfo.hitPoint;
-            ray.direction = normalize(hitInfo.normal + RandomDirection(rngState));
-
             Material material = ssbo_Meshes[hitInfo.HitMeshID].material;
-            vec3 emittedLight = vec3(material.emission.xyz) * (material.emission.w * float(u_RaysPerPixel));
+
+            ray.origin = hitInfo.hitPoint;
+            vec3 diffuseDir = normalize(hitInfo.normal + RandomDirection(rngState));
+            vec3 specularDir = reflect(ray.direction, hitInfo.normal);
+            ray.direction = mix(diffuseDir, specularDir, material.smoothness);
+
+            vec3 emittedLight = material.emission.xyz * (material.emission.w * float(u_RaysPerPixel));
             light += emittedLight * rayColor;
             rayColor *= material.color.xyz;
+
+            // Break early if ray color becomes negligible
+            if (all(lessThan(rayColor, vec3(0.01)))) break;
+
+            // Russian roulette probabilistic termination
+            if (i > 3)
+            {
+                float terminateProbability = max(max(rayColor.r, rayColor.g), rayColor.b);
+                if (RandomFloat(rngState) > terminateProbability) break;
+                rayColor /= terminateProbability;
+            }
+
         }
         else
         {
@@ -196,6 +211,7 @@ vec3 Trace(Ray ray, inout uint rngState)
 
     return light;
 }
+
 
 void main()
 {

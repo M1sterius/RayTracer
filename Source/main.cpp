@@ -28,7 +28,7 @@ int32_t main(int32_t argc, char* argv[])
     auto transform = CreateTransform(
             glm::vec3(0.0, 1.6, 0.0),
             glm::vec3(0, 0, 0),
-            glm::vec3(1.0, 0.5, 1.0)
+            glm::vec3(1.3, 0.5, 1.3)
     ); // LIGHT
     auto mesh = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(0.0, 0.0, 0.0, 1.0),
     glm::vec4(1.0, 1.0, 1.0, 2.0), 0.0}, transform);
@@ -74,12 +74,12 @@ glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform1);
         glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform5);
 
     auto transform6 = CreateTransform(
-            glm::vec3(0.0, 0.0, 0.0),
-            glm::vec3(3.14159 / 3, 3.14159 / 3, 3.14159 / 3),
-            glm::vec3(0.7, 0.7, 0.7)
+            glm::vec3(0.0, -0.5, 0.0),
+            glm::vec3(0.0, 3.14159 / 6, 0.0),
+            glm::vec3(1.2, 1.2, 1.2)
     );
-    auto mesh6 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(1.0),
-        glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform6);
+    auto mesh6 = Mesh("Resources/Meshes/Monkey.obj", {glm::vec4(1.0),
+        glm::vec4(0.0, 0.0, 0.0, 0.0), 0.3}, transform6);
 
     rayTracer.AddMesh(mesh);
     rayTracer.AddMesh(mesh1);
@@ -103,6 +103,7 @@ glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform1);
         LimitFPS(sw.Stop().AsSeconds(), 240);
     }
 }
+
 
 
 
