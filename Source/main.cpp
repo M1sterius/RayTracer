@@ -57,7 +57,7 @@ glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform1);
             glm::vec3(0.2, 2.0, 2.0)
     ); // RIGHT WALL
     auto mesh3 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(1.0, 0.0, 0.0, 1.0),
-        glm::vec4(0.0), 0.98}, transform3);
+        glm::vec4(0.0), 0.0}, transform3);
 
     auto transform4 = CreateTransform(
             glm::vec3(1.9, -0.5, 0),
@@ -65,7 +65,7 @@ glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform1);
             glm::vec3( 0.2, 2.0, 2.0)
     ); // LEFT WALL
     auto mesh4 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(0.0, 1.0, 0.0, 1.0),
-        glm::vec4(0.0), 0.98}, transform4);
+        glm::vec4(0.0), 0.0}, transform4);
 
     auto transform5 = CreateTransform(
             glm::vec3(0.0, 2.0, 0.0),

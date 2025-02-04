@@ -10,7 +10,7 @@ binaries linked, so the building process should be
 straightforward on all platforms. Use the following command to generate
 project with g++ and ninja.
 ``` bash 
-cmake -S . -B CMakeBuild -DCMAKE_BUILD_TYPE=Debug -G "Ninja" -DCMAKE_CXX_COMPILER=C:/MinGW/mingw64/bin/g++.exe
+cmake -S . -B CMakeBuild -DCMAKE_BUILD_TYPE=Debug -G "Ninja" -DCMAKE_CXX_COMPILER=g++.exe
 ```
 CMAKE_BUILD_TYPE supports "Debug" and "Release" builds.
 Use the next command to build the project.
