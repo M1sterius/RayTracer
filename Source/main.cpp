@@ -8,6 +8,8 @@
 #include <cstdint>
 
 #define print(x) std::cout << x << '\n'
+#define PI 3.14159265359
+#define rad(x) (x * (PI / 180))
 
 glm::mat4 CreateTransform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale)
 {
@@ -30,14 +32,14 @@ int32_t main(int32_t argc, char* argv[])
             glm::vec3(0, 0, 0),
             glm::vec3(1.3, 0.5, 1.3)
     ); // LIGHT
-    auto mesh = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(0.0, 0.0, 0.0, 1.0),
-    glm::vec4(1.0, 1.0, 1.0, 2.0), 0.0}, transform);
+    auto mesh0 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(0.0, 0.0, 0.0, 1.0),
+                    glm::vec4(1.0, 1.0, 1.0, 2.0), 0.0}, transform);
 
     auto transform1 = CreateTransform(
         glm::vec3(0.0, -2.0, 0.0),
         glm::vec3(0, 0, 0.0),
         glm::vec3(2.0, 0.2, 2.0)
-    );
+    ); // FLOOR
     auto mesh1 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(1.0),
 glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform1);
 
@@ -45,7 +47,7 @@ glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform1);
             glm::vec3(0.0, -0.5, -1.9),
             glm::vec3(0, 0, 0.0),
             glm::vec3(2.0, 2.0, 0.2)
-    );
+    ); // FRONT WALL
     auto mesh2 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(1.0, 1.0, 1.0, 1.0),
        glm::vec4(0.0), 0.0}, transform2);
 
@@ -53,35 +55,35 @@ glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform1);
             glm::vec3(-1.9, -0.5, 0),
             glm::vec3(0, 0, 0.0),
             glm::vec3(0.2, 2.0, 2.0)
-    );
+    ); // RIGHT WALL
     auto mesh3 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(1.0, 0.0, 0.0, 1.0),
-        glm::vec4(0.0), 0.0}, transform3);
+        glm::vec4(0.0), 0.98}, transform3);
 
     auto transform4 = CreateTransform(
             glm::vec3(1.9, -0.5, 0),
             glm::vec3(0, 0, 0.0),
             glm::vec3( 0.2, 2.0, 2.0)
-    );
+    ); // LEFT WALL
     auto mesh4 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(0.0, 1.0, 0.0, 1.0),
-        glm::vec4(0.0), 0.0}, transform4);
+        glm::vec4(0.0), 0.98}, transform4);
 
     auto transform5 = CreateTransform(
             glm::vec3(0.0, 2.0, 0.0),
             glm::vec3(0, 0, 0.0),
             glm::vec3(2.0, 0.2, 2.0)
-    );
+    ); // CEILING
     auto mesh5 = Mesh("Resources/Meshes/Cube.obj", {glm::vec4(1.0),
         glm::vec4(0.0, 0.0, 0.0, 0.0), 0.0}, transform5);
 
     auto transform6 = CreateTransform(
-            glm::vec3(0.0, -0.5, 0.0),
+            glm::vec3(0.0, -1.2, 0.0),
             glm::vec3(0.0, 3.14159 / 6, 0.0),
-            glm::vec3(1.2, 1.2, 1.2)
+            glm::vec3(1.0, 1.0, 1.0)
     );
-    auto mesh6 = Mesh("Resources/Meshes/Monkey.obj", {glm::vec4(1.0),
+    auto mesh6 = Mesh("Resources/Meshes/Knight.obj", {glm::vec4(1.0),
         glm::vec4(0.0, 0.0, 0.0, 0.0), 0.3}, transform6);
 
-    rayTracer.AddMesh(mesh);
+    rayTracer.AddMesh(mesh0);
     rayTracer.AddMesh(mesh1);
     rayTracer.AddMesh(mesh2);
     rayTracer.AddMesh(mesh3);
